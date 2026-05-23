@@ -18,7 +18,6 @@
     --text: #e8eaf0;
     --muted: #7a7f9a;
     --accent: #f0c040;
-    --accent2: #e87040;
     --ok: #3ecf8e;
     --ok-bg: rgba(62,207,142,0.1);
     --ok-border: rgba(62,207,142,0.3);
@@ -39,7 +38,6 @@
     line-height: 1.6;
   }
 
-  /* ── HEADER ── */
   header {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
@@ -55,256 +53,153 @@
     color: var(--accent);
     line-height: 1;
   }
-  header .subtitle {
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
+  header .subtitle { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
 
   /* ── SETUP ── */
-  #setup {
-    max-width: 640px;
-    margin: 40px auto;
-    padding: 0 20px;
-  }
+  #setup { max-width: 640px; margin: 40px auto; padding: 0 20px; }
   .section-title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 12px;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
   }
   .card-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    margin-bottom: 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px;
   }
-  .row2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
   .field label {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
+    display: block; font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
   }
   input[type="number"], input[type="text"], select {
-    background: var(--bg);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-    padding: 9px 12px;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.2s;
+    background: var(--bg); border: 1px solid var(--border2);
+    border-radius: var(--radius); color: var(--text);
+    font-family: inherit; font-size: 14px; padding: 9px 12px;
+    width: 100%; outline: none; transition: border-color 0.2s;
   }
   input:focus, select:focus { border-color: var(--accent); }
-
   .add-row { display: flex; gap: 8px; margin-bottom: 10px; }
   .add-row input { flex: 1; }
 
   button {
-    background: transparent;
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 13px;
-    padding: 9px 16px;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-    white-space: nowrap;
+    background: transparent; border: 1px solid var(--border2);
+    border-radius: var(--radius); color: var(--text);
+    font-family: inherit; font-size: 13px; padding: 9px 16px;
+    cursor: pointer; transition: background 0.15s, border-color 0.15s; white-space: nowrap;
   }
-  button:hover { background: var(--surface2); border-color: var(--border2); }
+  button:hover { background: var(--surface2); }
   button:active { transform: scale(0.98); }
   button:disabled { opacity: 0.35; cursor: not-allowed; }
-
-  .btn-primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #111;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-  }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #111; font-weight: 700; }
   .btn-primary:hover { background: #f5d060; border-color: #f5d060; }
-
   .btn-danger { border-color: var(--dup-border); color: var(--dup); }
   .btn-danger:hover { background: var(--dup-bg); }
+  .btn-success { background: var(--ok); border-color: var(--ok); color: #111; font-weight: 700; }
+  .btn-success:hover { background: #5ddfa5; border-color: #5ddfa5; }
 
   .tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; }
   .tag {
     display: flex; align-items: center; gap: 6px;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 20px;
-    padding: 4px 10px 4px 12px;
-    font-size: 13px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 20px; padding: 4px 10px 4px 12px; font-size: 13px;
   }
   .tag-x {
     background: none; border: none; color: var(--muted);
-    font-size: 16px; line-height: 1; padding: 0; cursor: pointer; border-radius: 50%;
+    font-size: 16px; line-height: 1; padding: 0; cursor: pointer;
     width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
   }
-  .tag-x:hover { color: var(--dup); background: none; }
+  .tag-x:hover { color: var(--dup); }
+  #setup-start-btn { width: 100%; padding: 12px; font-size: 15px; margin-top: 4px; }
 
-  #start-btn { width: 100%; padding: 12px; font-size: 15px; margin-top: 4px; }
+  /* ── REGISTER ── */
+  #register { display: none; padding: 16px 20px; }
+  .reg-toolbar {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: 10px; margin-bottom: 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 12px 16px;
+    justify-content: space-between;
+  }
+  .reg-toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .reg-progress { font-size: 12px; color: var(--muted); }
+  .reg-progress b { color: var(--accent); }
 
   /* ── DRAFT ── */
   #draft { display: none; padding: 16px 20px; }
-
   .draft-toolbar {
     display: flex; align-items: center; flex-wrap: wrap;
     gap: 10px; margin-bottom: 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 12px 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 12px 16px;
   }
-  .draft-toolbar label { font-size: 12px; color: var(--muted); }
-  .draft-toolbar select { width: auto; padding: 7px 10px; }
-  #reveal-btn { background: var(--accent); border-color: var(--accent); color: #111; font-weight: 700; }
-  #reveal-btn:hover { background: #f5d060; border-color: #f5d060; }
   .toolbar-sep { flex: 1; }
-
-  .stats {
-    display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
-  }
+  .stats { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
   .stat {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 8px 14px;
-    font-size: 12px;
-    color: var(--muted);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 8px 14px; font-size: 12px; color: var(--muted);
   }
   .stat b { color: var(--text); font-weight: 700; }
   .stat.ok-stat { border-color: var(--ok-border); }
   .stat.ok-stat b { color: var(--ok); }
   .stat.dup-stat { border-color: var(--dup-border); }
   .stat.dup-stat b { color: var(--dup); }
+  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 14px; flex-wrap: wrap; }
 
-  .legend {
-    display: flex; gap: 14px; font-size: 11px;
-    color: var(--muted); margin-bottom: 14px; flex-wrap: wrap;
-  }
-  .legend span { display: flex; align-items: center; gap: 4px; }
-
-  /* ── TABLE ── */
+  /* ── TABLE共通 ── */
   .table-wrap {
-    overflow: auto;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    max-height: calc(100vh - 220px);
+    overflow: auto; border: 1px solid var(--border);
+    border-radius: var(--radius-lg); max-height: calc(100vh - 240px);
   }
   table { border-collapse: collapse; min-width: 100%; }
-
   thead th {
-    background: var(--surface);
-    position: sticky; top: 0; z-index: 3;
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 1px; text-transform: uppercase;
-    color: var(--muted);
-    padding: 10px 8px;
-    border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border2);
-    white-space: nowrap;
-    text-align: center;
+    background: var(--surface); position: sticky; top: 0; z-index: 3;
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted); padding: 10px 8px;
+    border-right: 1px solid var(--border); border-bottom: 1px solid var(--border2);
+    white-space: nowrap; text-align: center;
   }
-  thead th:first-child {
-    left: 0; z-index: 4;
-    background: var(--surface);
-    min-width: 48px;
-  }
-  thead th.active-player {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
-
+  thead th:first-child { left: 0; z-index: 4; min-width: 48px; }
+  thead th.active-player { color: var(--accent); border-bottom-color: var(--accent); }
   tbody td {
-    padding: 5px 6px;
-    border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    text-align: center;
-    vertical-align: middle;
+    padding: 5px 6px; border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle;
   }
   tbody td:first-child {
-    position: sticky; left: 0; z-index: 1;
-    background: var(--surface);
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    border-right: 1px solid var(--border2);
-    padding: 5px 8px;
-    min-width: 48px;
+    position: sticky; left: 0; z-index: 1; background: var(--surface);
+    font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: 0.5px;
+    border-right: 1px solid var(--border2); padding: 5px 8px; min-width: 48px;
   }
   tbody tr:last-child td { border-bottom: none; }
 
-  /* ── CARD ── */
-  .card {
-    min-width: 90px;
-    max-width: 130px;
-    width: 100%;
-    min-height: 44px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: var(--hidden);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    color: var(--muted);
-    transition: background 0.15s, border-color 0.15s, transform 0.1s;
-    padding: 6px;
-    word-break: break-all;
-    line-height: 1.4;
-    text-align: center;
-    margin: auto;
+  /* ── 登録用インプット ── */
+  .reg-input {
+    width: 100%; min-width: 80px; max-width: 130px;
+    background: var(--bg); border: 1px solid var(--border2);
+    border-radius: var(--radius); color: var(--text);
+    font-family: inherit; font-size: 12px; padding: 6px 8px;
+    outline: none; text-align: center; transition: border-color 0.2s;
+    display: block; margin: auto;
   }
-  .card:hover:not(.revealed) { background: var(--surface2); border-color: var(--border2); transform: scale(1.02); }
-  .card.selected { border: 2px solid var(--accent) !important; background: rgba(240,192,64,0.08); }
-  .card.revealed { cursor: default; }
+  .reg-input:focus { border-color: var(--accent); background: var(--surface2); }
+  .reg-input.filled { border-color: var(--ok-border); color: var(--ok); }
+
+  /* ── めくりカード ── */
+  .card {
+    min-width: 90px; max-width: 130px; width: 100%; min-height: 52px;
+    border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--hidden); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--muted);
+    transition: background 0.15s, border-color 0.15s, transform 0.12s;
+    padding: 6px; word-break: break-all; line-height: 1.4;
+    text-align: center; margin: auto;
+    user-select: none;
+  }
+  .card:hover:not(.revealed) { background: var(--surface2); border-color: var(--border2); transform: scale(1.04); }
+  .card.revealed { cursor: default; font-size: 12px; }
   .card.ok { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok); }
   .card.dup { background: var(--dup-bg); border-color: var(--dup-border); color: var(--dup); }
-
   .card-mark { font-size: 14px; display: block; }
   .card-name { font-size: 11px; display: block; margin-top: 1px; }
-
-  /* ── MODAL ── */
-  .modal-overlay {
-    display: none;
-    position: fixed; inset: 0; z-index: 100;
-    background: rgba(0,0,0,0.7);
-    align-items: center; justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius-lg);
-    padding: 28px 24px;
-    min-width: 320px;
-    max-width: 420px;
-    width: 90%;
-  }
-  .modal h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-  .modal p { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-  .modal input { margin-bottom: 14px; }
-  .modal-btns { display: flex; gap: 8px; }
-  .modal-btns button { flex: 1; }
 </style>
 </head>
 <body>
@@ -316,7 +211,7 @@
   </div>
 </header>
 
-<!-- SETUP -->
+<!-- STEP 1: 参加者設定 -->
 <div id="setup">
   <div class="card-box">
     <div class="section-title">基本設定</div>
@@ -337,55 +232,53 @@
     </div>
     <div class="tags" id="tags"></div>
   </div>
-  <button class="btn-primary" id="start-btn" disabled>ドラフトボードを作成 →</button>
+  <button class="btn-primary" id="setup-start-btn" disabled>馬名登録へ →</button>
 </div>
 
-<!-- DRAFT -->
+<!-- STEP 2: 馬名登録 -->
+<div id="register">
+  <div class="reg-toolbar">
+    <div class="reg-toolbar-left">
+      <span class="reg-progress">入力済み：<b id="reg-count">0</b> / <span id="reg-total">0</span></span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-danger" onclick="backToSetup()">← 参加者設定に戻る</button>
+      <button class="btn-success" id="draft-start-btn">ドラフト開始 →</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table id="reg-table"></table>
+  </div>
+</div>
+
+<!-- STEP 3: ドラフト発表 -->
 <div id="draft">
   <div class="draft-toolbar">
-    <label>参加者：</label>
-    <select id="player-sel"></select>
-    <label>順位：</label>
-    <select id="rank-sel"></select>
-    <button id="reveal-btn">めくる</button>
+    <div class="stats" id="stats" style="margin:0;"></div>
     <div class="toolbar-sep"></div>
-    <button class="btn-danger" onclick="resetDraft()">最初からやり直す</button>
+    <button class="btn-danger" onclick="resetAll()">最初からやり直す</button>
   </div>
-  <div class="stats" id="stats"></div>
-  <div class="legend">
+  <div class="legend" style="padding: 0 4px 10px;">
     <span>🎯 当選（他に指名なし）</span>
     <span>😇 ハズレ（すでに指名済み）</span>
-    <span style="color:var(--accent)">■ 選択中のカード</span>
+    <span>🂠 クリックでめくる</span>
   </div>
   <div class="table-wrap">
     <table id="draft-table"></table>
   </div>
 </div>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <h3 id="modal-title">馬名を入力</h3>
-    <p id="modal-desc"></p>
-    <input type="text" id="modal-input" placeholder="馬名を入力..." maxlength="30">
-    <div class="modal-btns">
-      <button onclick="closeModal()">キャンセル</button>
-      <button class="btn-primary" onclick="confirmReveal()">確定</button>
-    </div>
-  </div>
-</div>
-
 <script>
 let participants = [];
 let maxH = 15;
-let draftData = {};
-let revealedHorses = {};
-let pendingPlayer = null;
-let pendingRank = null;
+let draftData = {};      // {player: [horse, ...]}
+let revealedHorses = {}; // {horseName: firstPlayer}
+let revealedSet = {};    // {player: [bool, ...]}
 
+// ── STEP1 参加者設定 ──
 const pInput = document.getElementById('p-input');
 const tagsEl = document.getElementById('tags');
-const startBtn = document.getElementById('start-btn');
+const setupStartBtn = document.getElementById('setup-start-btn');
 
 function renderTags() {
   tagsEl.innerHTML = '';
@@ -395,13 +288,10 @@ function renderTags() {
     t.innerHTML = `<span>${p}</span><button class="tag-x" onclick="removeP(${i})">×</button>`;
     tagsEl.appendChild(t);
   });
-  startBtn.disabled = participants.length < 2;
+  setupStartBtn.disabled = participants.length < 2;
 }
 
-function removeP(i) {
-  participants.splice(i, 1);
-  renderTags();
-}
+function removeP(i) { participants.splice(i, 1); renderTags(); }
 
 document.getElementById('add-p-btn').addEventListener('click', () => {
   const v = pInput.value.trim();
@@ -413,62 +303,126 @@ document.getElementById('add-p-btn').addEventListener('click', () => {
   pInput.value = '';
   renderTags();
 });
-
 pInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('add-p-btn').click(); });
 
-document.getElementById('start-btn').addEventListener('click', () => {
+setupStartBtn.addEventListener('click', () => {
   maxH = parseInt(document.getElementById('max-h').value) || 15;
   draftData = {};
-  revealedHorses = {};
   participants.forEach(p => { draftData[p] = Array(maxH).fill(''); });
-  buildUI();
-  document.getElementById('setup').style.display = 'none';
-  document.getElementById('draft').style.display = 'block';
+  showRegister();
 });
 
-function buildUI() {
-  const pSel = document.getElementById('player-sel');
-  const rSel = document.getElementById('rank-sel');
-  pSel.innerHTML = participants.map(p => `<option value="${p}">${p}</option>`).join('');
-  rSel.innerHTML = Array.from({length: maxH}, (_, i) => `<option value="${i}">${i+1}位</option>`).join('');
-  buildTable();
-  updateStats();
+function backToSetup() {
+  document.getElementById('register').style.display = 'none';
+  document.getElementById('setup').style.display = 'block';
 }
 
-function buildTable() {
-  const table = document.getElementById('draft-table');
+// ── STEP2 馬名登録 ──
+function showRegister() {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('register').style.display = 'block';
+  buildRegTable();
+  updateRegProgress();
+}
+
+function buildRegTable() {
+  const table = document.getElementById('reg-table');
   table.innerHTML = '';
   const head = document.createElement('thead');
   const hr = document.createElement('tr');
-  const th0 = document.createElement('th');
-  th0.textContent = '順位';
-  hr.appendChild(th0);
+  const th0 = document.createElement('th'); th0.textContent = '順位'; hr.appendChild(th0);
   participants.forEach(p => {
-    const th = document.createElement('th');
-    th.id = `th-${p}`;
-    th.textContent = p;
-    hr.appendChild(th);
+    const th = document.createElement('th'); th.textContent = p; hr.appendChild(th);
   });
-  head.appendChild(hr);
-  table.appendChild(head);
+  head.appendChild(hr); table.appendChild(head);
 
   const body = document.createElement('tbody');
   for (let i = 0; i < maxH; i++) {
     const tr = document.createElement('tr');
-    const td0 = document.createElement('td');
-    td0.textContent = `${i+1}位`;
-    tr.appendChild(td0);
+    const td0 = document.createElement('td'); td0.textContent = `${i+1}位`; tr.appendChild(td0);
+    participants.forEach(p => {
+      const td = document.createElement('td');
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'reg-input';
+      inp.maxLength = 30;
+      inp.placeholder = '馬名';
+      inp.value = draftData[p][i] || '';
+      if (inp.value) inp.classList.add('filled');
+      inp.addEventListener('input', () => {
+        draftData[p][i] = inp.value.trim();
+        inp.classList.toggle('filled', !!inp.value.trim());
+        updateRegProgress();
+      });
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          // 次のセルへ移動
+          const inputs = Array.from(document.querySelectorAll('.reg-input'));
+          const idx = inputs.indexOf(inp);
+          if (idx + 1 < inputs.length) inputs[idx + 1].focus();
+        }
+      });
+      td.appendChild(inp);
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  }
+  table.appendChild(body);
+}
+
+function updateRegProgress() {
+  const total = participants.length * maxH;
+  const filled = Object.values(draftData).flat().filter(x => x).length;
+  document.getElementById('reg-count').textContent = filled;
+  document.getElementById('reg-total').textContent = total;
+  document.getElementById('draft-start-btn').disabled = filled === 0;
+}
+
+document.getElementById('draft-start-btn').addEventListener('click', () => {
+  const empty = participants.some(p => draftData[p].some(h => !h));
+  if (empty) {
+    if (!confirm('未入力の馬名があります。このままドラフトを開始しますか？')) return;
+  }
+  revealedHorses = {};
+  revealedSet = {};
+  participants.forEach(p => { revealedSet[p] = Array(maxH).fill(false); });
+  showDraft();
+});
+
+// ── STEP3 ドラフト発表 ──
+function showDraft() {
+  document.getElementById('register').style.display = 'none';
+  document.getElementById('draft').style.display = 'block';
+  buildDraftTable();
+  updateStats();
+}
+
+function buildDraftTable() {
+  const table = document.getElementById('draft-table');
+  table.innerHTML = '';
+  const head = document.createElement('thead');
+  const hr = document.createElement('tr');
+  const th0 = document.createElement('th'); th0.textContent = '順位'; hr.appendChild(th0);
+  participants.forEach(p => {
+    const th = document.createElement('th'); th.id = `dth-${p}`; th.textContent = p; hr.appendChild(th);
+  });
+  head.appendChild(hr); table.appendChild(head);
+
+  const body = document.createElement('tbody');
+  for (let i = 0; i < maxH; i++) {
+    const tr = document.createElement('tr');
+    const td0 = document.createElement('td'); td0.textContent = `${i+1}位`; tr.appendChild(td0);
     participants.forEach(p => {
       const td = document.createElement('td');
       const card = document.createElement('div');
       card.className = 'card';
-      card.id = `card-${CSS.escape(p)}-${i}`;
-      const horse = draftData[p][i];
-      if (horse) {
-        applyRevealed(card, horse);
+      card.id = `dcard-${encodeId(p)}-${i}`;
+      card.textContent = '🂠';
+      if (draftData[p][i]) {
+        card.addEventListener('click', () => revealCard(p, i));
       } else {
-        card.textContent = '？';
-        card.addEventListener('click', () => selectCard(p, i));
+        card.style.opacity = '0.3';
+        card.style.cursor = 'default';
       }
       td.appendChild(card);
       tr.appendChild(td);
@@ -478,103 +432,29 @@ function buildTable() {
   table.appendChild(body);
 }
 
-function getCard(p, i) {
-  return document.getElementById(`card-${CSS.escape(p)}-${i}`);
-}
+function encodeId(str) { return str.replace(/[^a-zA-Z0-9]/g, c => '_' + c.charCodeAt(0) + '_'); }
 
-function selectCard(p, rank) {
-  document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
-  const card = getCard(p, rank);
-  if (card && !card.classList.contains('revealed')) {
-    card.classList.add('selected');
-    document.getElementById('player-sel').value = p;
-    document.getElementById('rank-sel').value = rank;
-    highlightHeader(p);
-  }
-}
+function getDCard(p, i) { return document.getElementById(`dcard-${encodeId(p)}-${i}`); }
 
-function highlightHeader(p) {
-  document.querySelectorAll('thead th').forEach(th => th.classList.remove('active-player'));
-  const th = document.getElementById(`th-${p}`);
-  if (th) th.classList.add('active-player');
-}
+function revealCard(p, rank) {
+  if (revealedSet[p][rank]) return;
+  revealedSet[p][rank] = true;
+  const horse = draftData[p][rank];
+  if (!horse) return;
 
-function applyRevealed(card, horse) {
-  card.classList.add('revealed');
   const isDup = revealedHorses[horse] !== undefined;
+  if (!isDup) revealedHorses[horse] = p;
+
+  const card = getDCard(p, rank);
+  card.classList.add('revealed');
   card.classList.add(isDup ? 'dup' : 'ok');
   card.innerHTML = `<span class="card-mark">${isDup ? '😇' : '🎯'}</span><span class="card-name">${horse}</span>`;
-}
-
-document.getElementById('reveal-btn').addEventListener('click', () => {
-  const p = document.getElementById('player-sel').value;
-  const rank = parseInt(document.getElementById('rank-sel').value);
-  const card = getCard(p, rank);
-  if (!card || card.classList.contains('revealed')) {
-    alert('このカードは既にめくられています');
-    return;
-  }
-  openModal(p, rank);
-});
-
-function openModal(p, rank) {
-  pendingPlayer = p;
-  pendingRank = rank;
-  document.getElementById('modal-title').textContent = `${p} — ${rank+1}位`;
-  document.getElementById('modal-desc').textContent = '指名馬の馬名を入力してください';
-  const inp = document.getElementById('modal-input');
-  inp.value = '';
-  document.getElementById('modal').classList.add('open');
-  setTimeout(() => inp.focus(), 50);
-}
-
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  pendingPlayer = null;
-  pendingRank = null;
-}
-
-document.getElementById('modal-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') confirmReveal();
-  if (e.key === 'Escape') closeModal();
-});
-
-document.getElementById('modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal')) closeModal();
-});
-
-function confirmReveal() {
-  const h = document.getElementById('modal-input').value.trim();
-  if (!h) { alert('馬名を入力してください'); return; }
-  const p = pendingPlayer;
-  const rank = pendingRank;
-  closeModal();
-
-  draftData[p][rank] = h;
-  if (revealedHorses[h] === undefined) revealedHorses[h] = p;
-
-  const card = getCard(p, rank);
-  card.classList.remove('selected');
-  applyRevealed(card, h);
   updateStats();
-
-  const nextRank = Array.from({length: maxH}, (_, i) => i).find(i => i > rank && !draftData[p][i]);
-  if (nextRank !== undefined) {
-    document.getElementById('rank-sel').value = nextRank;
-  } else {
-    const nextP = participants.find(pp => pp !== p && draftData[pp].some(x => !x));
-    if (nextP) {
-      document.getElementById('player-sel').value = nextP;
-      const nr = draftData[nextP].findIndex(x => !x);
-      if (nr >= 0) document.getElementById('rank-sel').value = nr;
-    }
-  }
-  highlightHeader(document.getElementById('player-sel').value);
 }
 
 function updateStats() {
-  const total = participants.length * maxH;
-  const revealed = Object.values(draftData).flat().filter(x => x).length;
+  const total = Object.values(draftData).flat().filter(x => x).length;
+  const revealed = Object.values(revealedSet).flat().filter(Boolean).length;
   const wins = Object.keys(revealedHorses).length;
   const dups = revealed - wins;
   document.getElementById('stats').innerHTML =
@@ -583,13 +463,11 @@ function updateStats() {
     `<div class="stat dup-stat">😇 重複　<b>${dups}</b></div>`;
 }
 
-function resetDraft() {
-  if (!confirm('最初からやり直しますか？入力済みのデータは消えます。')) return;
+function resetAll() {
+  if (!confirm('最初からやり直しますか？すべてのデータが消えます。')) return;
+  draftData = {}; revealedHorses = {}; revealedSet = {}; participants = [];
   document.getElementById('draft').style.display = 'none';
   document.getElementById('setup').style.display = 'block';
-  draftData = {};
-  revealedHorses = {};
-  participants = [];
   renderTags();
 }
 </script>
