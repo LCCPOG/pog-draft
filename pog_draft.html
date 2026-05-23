@@ -6,86 +6,36 @@
 <title>POG ドラフト発表ツール</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Bebas+Neue&display=swap');
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #22263a;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.15);
-    --text: #e8eaf0;
-    --muted: #7a7f9a;
-    --accent: #f0c040;
-    --ok: #3ecf8e;
-    --ok-bg: rgba(62,207,142,0.1);
-    --ok-border: rgba(62,207,142,0.3);
-    --dup: #e85050;
-    --dup-bg: rgba(232,80,80,0.1);
-    --dup-border: rgba(232,80,80,0.3);
-    --hidden: #2a2e42;
-    --radius: 8px;
-    --radius-lg: 12px;
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+    --text: #e8eaf0; --muted: #7a7f9a; --accent: #f0c040;
+    --ok: #3ecf8e; --ok-bg: rgba(62,207,142,0.1); --ok-border: rgba(62,207,142,0.3);
+    --dup: #e85050; --dup-bg: rgba(232,80,80,0.1); --dup-border: rgba(232,80,80,0.3);
+    --hidden: #2a2e42; --radius: 8px; --radius-lg: 12px;
   }
+  body { background: var(--bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; min-height: 100vh; font-size: 14px; line-height: 1.6; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Noto Sans JP', sans-serif;
-    min-height: 100vh;
-    font-size: 14px;
-    line-height: 1.6;
-  }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+  .subtitle { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .header-right { margin-left: auto; }
+  .save-badge { font-size: 11px; color: var(--ok); background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 20px; padding: 3px 10px; opacity: 0; transition: opacity 0.4s; }
+  .save-badge.show { opacity: 1; }
 
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  header .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    line-height: 1;
-  }
-  header .subtitle { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-
-  /* ── SETUP ── */
   #setup { max-width: 640px; margin: 40px auto; padding: 0 20px; }
-  .section-title {
-    font-size: 11px; font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
-  }
-  .card-box {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px;
-  }
+  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .card-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .field label {
-    display: block; font-size: 11px; font-weight: 700;
-    letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
-  }
-  input[type="number"], input[type="text"], select {
-    background: var(--bg); border: 1px solid var(--border2);
-    border-radius: var(--radius); color: var(--text);
-    font-family: inherit; font-size: 14px; padding: 9px 12px;
-    width: 100%; outline: none; transition: border-color 0.2s;
-  }
+  .field label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+
+  input[type="number"], input[type="text"], select { background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 14px; padding: 9px 12px; width: 100%; outline: none; transition: border-color 0.2s; }
   input:focus, select:focus { border-color: var(--accent); }
   .add-row { display: flex; gap: 8px; margin-bottom: 10px; }
   .add-row input { flex: 1; }
 
-  button {
-    background: transparent; border: 1px solid var(--border2);
-    border-radius: var(--radius); color: var(--text);
-    font-family: inherit; font-size: 13px; padding: 9px 16px;
-    cursor: pointer; transition: background 0.15s, border-color 0.15s; white-space: nowrap;
-  }
+  button { background: transparent; border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 13px; padding: 9px 16px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
   button:hover { background: var(--surface2); }
   button:active { transform: scale(0.98); }
   button:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -94,108 +44,52 @@
   .btn-danger { border-color: var(--dup-border); color: var(--dup); }
   .btn-danger:hover { background: var(--dup-bg); }
   .btn-success { background: var(--ok); border-color: var(--ok); color: #111; font-weight: 700; }
-  .btn-success:hover { background: #5ddfa5; border-color: #5ddfa5; }
+  .btn-success:hover { background: #5ddfa5; }
 
   .tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; }
-  .tag {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--surface2); border: 1px solid var(--border2);
-    border-radius: 20px; padding: 4px 10px 4px 12px; font-size: 13px;
-  }
-  .tag-x {
-    background: none; border: none; color: var(--muted);
-    font-size: 16px; line-height: 1; padding: 0; cursor: pointer;
-    width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
-  }
+  .tag { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 10px 4px 12px; font-size: 13px; }
+  .tag-x { background: none; border: none; color: var(--muted); font-size: 16px; padding: 0; cursor: pointer; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; }
   .tag-x:hover { color: var(--dup); }
   #setup-start-btn { width: 100%; padding: 12px; font-size: 15px; margin-top: 4px; }
 
-  /* ── REGISTER ── */
+  .resume-box { background: var(--surface2); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 16px; display: none; }
+  .resume-box p { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .resume-box b { color: var(--accent); }
+  .resume-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
   #register { display: none; padding: 16px 20px; }
-  .reg-toolbar {
-    display: flex; align-items: center; flex-wrap: wrap;
-    gap: 10px; margin-bottom: 16px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); padding: 12px 16px;
-    justify-content: space-between;
-  }
-  .reg-toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  #draft { display: none; padding: 16px 20px; }
+
+  .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 16px; }
+  .toolbar-sep { flex: 1; }
   .reg-progress { font-size: 12px; color: var(--muted); }
   .reg-progress b { color: var(--accent); }
 
-  /* ── DRAFT ── */
-  #draft { display: none; padding: 16px 20px; }
-  .draft-toolbar {
-    display: flex; align-items: center; flex-wrap: wrap;
-    gap: 10px; margin-bottom: 16px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); padding: 12px 16px;
-  }
-  .toolbar-sep { flex: 1; }
   .stats { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
-  .stat {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 8px 14px; font-size: 12px; color: var(--muted);
-  }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 14px; font-size: 12px; color: var(--muted); }
   .stat b { color: var(--text); font-weight: 700; }
   .stat.ok-stat { border-color: var(--ok-border); }
   .stat.ok-stat b { color: var(--ok); }
   .stat.dup-stat { border-color: var(--dup-border); }
   .stat.dup-stat b { color: var(--dup); }
-  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 14px; flex-wrap: wrap; }
+  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 14px; flex-wrap: wrap; padding: 0 4px; }
 
-  /* ── TABLE共通 ── */
-  .table-wrap {
-    overflow: auto; border: 1px solid var(--border);
-    border-radius: var(--radius-lg); max-height: calc(100vh - 240px);
-  }
+  .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); max-height: calc(100vh - 240px); }
   table { border-collapse: collapse; min-width: 100%; }
-  thead th {
-    background: var(--surface); position: sticky; top: 0; z-index: 3;
-    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-    color: var(--muted); padding: 10px 8px;
-    border-right: 1px solid var(--border); border-bottom: 1px solid var(--border2);
-    white-space: nowrap; text-align: center;
-  }
+  thead th { background: var(--surface); position: sticky; top: 0; z-index: 3; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding: 10px 8px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border2); white-space: nowrap; text-align: center; }
   thead th:first-child { left: 0; z-index: 4; min-width: 48px; }
-  thead th.active-player { color: var(--accent); border-bottom-color: var(--accent); }
-  tbody td {
-    padding: 5px 6px; border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle;
-  }
-  tbody td:first-child {
-    position: sticky; left: 0; z-index: 1; background: var(--surface);
-    font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: 0.5px;
-    border-right: 1px solid var(--border2); padding: 5px 8px; min-width: 48px;
-  }
+  tbody td { padding: 5px 6px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
+  tbody td:first-child { position: sticky; left: 0; z-index: 1; background: var(--surface); font-size: 11px; color: var(--muted); font-weight: 700; border-right: 1px solid var(--border2); padding: 5px 8px; min-width: 48px; }
   tbody tr:last-child td { border-bottom: none; }
 
-  /* ── 登録用インプット ── */
-  .reg-input {
-    width: 100%; min-width: 80px; max-width: 130px;
-    background: var(--bg); border: 1px solid var(--border2);
-    border-radius: var(--radius); color: var(--text);
-    font-family: inherit; font-size: 12px; padding: 6px 8px;
-    outline: none; text-align: center; transition: border-color 0.2s;
-    display: block; margin: auto;
-  }
+  .reg-input { width: 100%; min-width: 80px; max-width: 130px; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 12px; padding: 6px 8px; outline: none; text-align: center; transition: border-color 0.2s; display: block; margin: auto; }
   .reg-input:focus { border-color: var(--accent); background: var(--surface2); }
   .reg-input.filled { border-color: var(--ok-border); color: var(--ok); }
 
-  /* ── めくりカード ── */
-  .card {
-    min-width: 90px; max-width: 130px; width: 100%; min-height: 52px;
-    border-radius: var(--radius); border: 1px solid var(--border);
-    background: var(--hidden); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; color: var(--muted);
-    transition: background 0.15s, border-color 0.15s, transform 0.12s;
-    padding: 6px; word-break: break-all; line-height: 1.4;
-    text-align: center; margin: auto;
-    user-select: none;
-  }
-  .card:hover:not(.revealed) { background: var(--surface2); border-color: var(--border2); transform: scale(1.04); }
+  .card { min-width: 90px; max-width: 130px; width: 100%; min-height: 52px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--hidden); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--muted); transition: background 0.15s, transform 0.12s; padding: 6px; word-break: break-all; line-height: 1.4; text-align: center; margin: auto; user-select: none; }
+  .card:hover:not(.revealed):not(.empty) { background: var(--surface2); border-color: var(--border2); transform: scale(1.04); }
   .card.revealed { cursor: default; font-size: 12px; }
+  .card.empty { opacity: 0.25; cursor: default; }
   .card.ok { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok); }
   .card.dup { background: var(--dup-bg); border-color: var(--dup-border); color: var(--dup); }
   .card-mark { font-size: 14px; display: block; }
@@ -209,21 +103,25 @@
     <div class="logo">POG DRAFT</div>
     <div class="subtitle">発表ツール</div>
   </div>
+  <div class="header-right">
+    <span class="save-badge" id="save-badge">保存しました</span>
+  </div>
 </header>
 
-<!-- STEP 1: 参加者設定 -->
+<!-- STEP 1 -->
 <div id="setup">
+  <div class="resume-box" id="resume-box">
+    <p>前回の途中データが見つかりました。<br><b id="resume-info"></b></p>
+    <div class="resume-btns">
+      <button class="btn-primary" onclick="resumeSession()">続きから再開する</button>
+      <button class="btn-danger" onclick="clearSaved()">新しくはじめる</button>
+    </div>
+  </div>
   <div class="card-box">
     <div class="section-title">基本設定</div>
     <div class="row2">
-      <div class="field">
-        <label>参加者数上限</label>
-        <input type="number" id="max-p" value="15" min="2" max="15">
-      </div>
-      <div class="field">
-        <label>指名馬数（1人あたり）</label>
-        <input type="number" id="max-h" value="15" min="1" max="15">
-      </div>
+      <div class="field"><label>参加者数上限</label><input type="number" id="max-p" value="15" min="2" max="15"></div>
+      <div class="field"><label>指名馬数（1人あたり）</label><input type="number" id="max-h" value="15" min="1" max="15"></div>
     </div>
     <div class="section-title">参加者</div>
     <div class="add-row">
@@ -235,47 +133,90 @@
   <button class="btn-primary" id="setup-start-btn" disabled>馬名登録へ →</button>
 </div>
 
-<!-- STEP 2: 馬名登録 -->
+<!-- STEP 2 -->
 <div id="register">
-  <div class="reg-toolbar">
-    <div class="reg-toolbar-left">
-      <span class="reg-progress">入力済み：<b id="reg-count">0</b> / <span id="reg-total">0</span></span>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn-danger" onclick="backToSetup()">← 参加者設定に戻る</button>
-      <button class="btn-success" id="draft-start-btn">ドラフト開始 →</button>
-    </div>
+  <div class="toolbar">
+    <span class="reg-progress">入力済み：<b id="reg-count">0</b> / <span id="reg-total">0</span></span>
+    <div class="toolbar-sep"></div>
+    <button onclick="backToSetup()">← 参加者設定に戻る</button>
+    <button class="btn-success" id="draft-start-btn" disabled>ドラフト開始 →</button>
   </div>
-  <div class="table-wrap">
-    <table id="reg-table"></table>
-  </div>
+  <div class="table-wrap"><table id="reg-table"></table></div>
 </div>
 
-<!-- STEP 3: ドラフト発表 -->
+<!-- STEP 3 -->
 <div id="draft">
-  <div class="draft-toolbar">
+  <div class="toolbar">
     <div class="stats" id="stats" style="margin:0;"></div>
     <div class="toolbar-sep"></div>
+    <button onclick="backToRegister()">← 馬名登録に戻る</button>
     <button class="btn-danger" onclick="resetAll()">最初からやり直す</button>
   </div>
-  <div class="legend" style="padding: 0 4px 10px;">
+  <div class="legend">
     <span>🎯 当選（他に指名なし）</span>
     <span>😇 ハズレ（すでに指名済み）</span>
     <span>🂠 クリックでめくる</span>
   </div>
-  <div class="table-wrap">
-    <table id="draft-table"></table>
-  </div>
+  <div class="table-wrap"><table id="draft-table"></table></div>
 </div>
 
 <script>
+const STORAGE_KEY = 'pog_draft_v1';
+
 let participants = [];
 let maxH = 15;
-let draftData = {};      // {player: [horse, ...]}
-let revealedHorses = {}; // {horseName: firstPlayer}
-let revealedSet = {};    // {player: [bool, ...]}
+let draftData = {};       // {player: [horseName, ...]}
+let revealedHorses = {};  // {horseName: playerName} 最初に出た人を記録
+let revealedSet = {};     // {player: [bool, ...]}
+let currentStep = 'setup';
 
-// ── STEP1 参加者設定 ──
+// ── 保存 ──
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ participants, maxH, draftData, revealedHorses, revealedSet, currentStep }));
+    const b = document.getElementById('save-badge');
+    b.classList.add('show');
+    setTimeout(() => b.classList.remove('show'), 1800);
+  } catch(e) {}
+}
+
+function loadState() {
+  try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; }
+}
+
+function clearSaved() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  document.getElementById('resume-box').style.display = 'none';
+}
+
+// ── 起動 ──
+window.addEventListener('load', () => {
+  const s = loadState();
+  if (s && s.participants && s.participants.length > 0) {
+    const stepNames = { setup: '参加者設定', register: '馬名登録中', draft: 'ドラフト発表中' };
+    document.getElementById('resume-info').textContent =
+      `参加者 ${s.participants.length}人 / ${s.maxH}頭 / ${stepNames[s.currentStep] || ''}`;
+    document.getElementById('resume-box').style.display = 'block';
+  }
+});
+
+function resumeSession() {
+  const s = loadState();
+  if (!s) return;
+  participants = s.participants;
+  maxH = s.maxH;
+  draftData = s.draftData;
+  revealedHorses = s.revealedHorses || {};
+  revealedSet = s.revealedSet || {};
+  currentStep = s.currentStep;
+  document.getElementById('max-p').value = participants.length;
+  document.getElementById('max-h').value = maxH;
+  renderTags();
+  if (currentStep === 'draft') showDraft();
+  else showRegister();
+}
+
+// ── STEP1 ──
 const pInput = document.getElementById('p-input');
 const tagsEl = document.getElementById('tags');
 const setupStartBtn = document.getElementById('setup-start-btn');
@@ -313,61 +254,60 @@ setupStartBtn.addEventListener('click', () => {
 });
 
 function backToSetup() {
+  currentStep = 'setup';
+  saveState();
   document.getElementById('register').style.display = 'none';
   document.getElementById('setup').style.display = 'block';
 }
 
-// ── STEP2 馬名登録 ──
+// ── STEP2 ──
 function showRegister() {
+  currentStep = 'register';
   document.getElementById('setup').style.display = 'none';
+  document.getElementById('draft').style.display = 'none';
   document.getElementById('register').style.display = 'block';
   buildRegTable();
   updateRegProgress();
+  saveState();
 }
 
 function buildRegTable() {
   const table = document.getElementById('reg-table');
   table.innerHTML = '';
-  const head = document.createElement('thead');
+  const thead = document.createElement('thead');
   const hr = document.createElement('tr');
   const th0 = document.createElement('th'); th0.textContent = '順位'; hr.appendChild(th0);
-  participants.forEach(p => {
-    const th = document.createElement('th'); th.textContent = p; hr.appendChild(th);
-  });
-  head.appendChild(hr); table.appendChild(head);
+  participants.forEach(p => { const th = document.createElement('th'); th.textContent = p; hr.appendChild(th); });
+  thead.appendChild(hr); table.appendChild(thead);
 
-  const body = document.createElement('tbody');
+  const tbody = document.createElement('tbody');
   for (let i = 0; i < maxH; i++) {
     const tr = document.createElement('tr');
     const td0 = document.createElement('td'); td0.textContent = `${i+1}位`; tr.appendChild(td0);
     participants.forEach(p => {
       const td = document.createElement('td');
       const inp = document.createElement('input');
-      inp.type = 'text';
-      inp.className = 'reg-input';
-      inp.maxLength = 30;
-      inp.placeholder = '馬名';
+      inp.type = 'text'; inp.className = 'reg-input'; inp.maxLength = 30; inp.placeholder = '馬名';
       inp.value = draftData[p][i] || '';
       if (inp.value) inp.classList.add('filled');
       inp.addEventListener('input', () => {
         draftData[p][i] = inp.value.trim();
         inp.classList.toggle('filled', !!inp.value.trim());
         updateRegProgress();
+        saveState();
       });
       inp.addEventListener('keydown', e => {
         if (e.key === 'Enter') {
-          // 次のセルへ移動
           const inputs = Array.from(document.querySelectorAll('.reg-input'));
           const idx = inputs.indexOf(inp);
           if (idx + 1 < inputs.length) inputs[idx + 1].focus();
         }
       });
-      td.appendChild(inp);
-      tr.appendChild(td);
+      td.appendChild(inp); tr.appendChild(td);
     });
-    body.appendChild(tr);
+    tbody.appendChild(tr);
   }
-  table.appendChild(body);
+  table.appendChild(tbody);
 }
 
 function updateRegProgress() {
@@ -380,35 +320,41 @@ function updateRegProgress() {
 
 document.getElementById('draft-start-btn').addEventListener('click', () => {
   const empty = participants.some(p => draftData[p].some(h => !h));
-  if (empty) {
-    if (!confirm('未入力の馬名があります。このままドラフトを開始しますか？')) return;
-  }
+  if (empty && !confirm('未入力の馬名があります。このままドラフトを開始しますか？')) return;
   revealedHorses = {};
   revealedSet = {};
   participants.forEach(p => { revealedSet[p] = Array(maxH).fill(false); });
   showDraft();
 });
 
-// ── STEP3 ドラフト発表 ──
+function backToRegister() {
+  showRegister();
+}
+
+// ── STEP3 ──
 function showDraft() {
+  currentStep = 'draft';
   document.getElementById('register').style.display = 'none';
+  document.getElementById('setup').style.display = 'none';
   document.getElementById('draft').style.display = 'block';
   buildDraftTable();
   updateStats();
+  saveState();
 }
+
+function encodeId(str) { return str.replace(/[^a-zA-Z0-9]/g, c => '_' + c.charCodeAt(0) + '_'); }
+function getDCard(p, i) { return document.getElementById(`dc_${encodeId(p)}_${i}`); }
 
 function buildDraftTable() {
   const table = document.getElementById('draft-table');
   table.innerHTML = '';
-  const head = document.createElement('thead');
+  const thead = document.createElement('thead');
   const hr = document.createElement('tr');
   const th0 = document.createElement('th'); th0.textContent = '順位'; hr.appendChild(th0);
-  participants.forEach(p => {
-    const th = document.createElement('th'); th.id = `dth-${p}`; th.textContent = p; hr.appendChild(th);
-  });
-  head.appendChild(hr); table.appendChild(head);
+  participants.forEach(p => { const th = document.createElement('th'); th.textContent = p; hr.appendChild(th); });
+  thead.appendChild(hr); table.appendChild(thead);
 
-  const body = document.createElement('tbody');
+  const tbody = document.createElement('tbody');
   for (let i = 0; i < maxH; i++) {
     const tr = document.createElement('tr');
     const td0 = document.createElement('td'); td0.textContent = `${i+1}位`; tr.appendChild(td0);
@@ -416,40 +362,43 @@ function buildDraftTable() {
       const td = document.createElement('td');
       const card = document.createElement('div');
       card.className = 'card';
-      card.id = `dcard-${encodeId(p)}-${i}`;
-      card.textContent = '🂠';
-      if (draftData[p][i]) {
-        card.addEventListener('click', () => revealCard(p, i));
+      card.id = `dc_${encodeId(p)}_${i}`;
+      const horse = draftData[p][i];
+
+      if (!horse) {
+        card.classList.add('empty');
+        card.textContent = '－';
+      } else if (revealedSet[p] && revealedSet[p][i]) {
+        // 再開時：すでにめくり済み
+        const isDup = revealedHorses[horse] !== p;
+        card.classList.add('revealed', isDup ? 'dup' : 'ok');
+        card.innerHTML = `<span class="card-mark">${isDup ? '😇' : '🎯'}</span><span class="card-name">${horse}</span>`;
       } else {
-        card.style.opacity = '0.3';
-        card.style.cursor = 'default';
+        card.textContent = '🂠';
+        card.addEventListener('click', () => revealCard(p, i));
       }
-      td.appendChild(card);
-      tr.appendChild(td);
+      td.appendChild(card); tr.appendChild(td);
     });
-    body.appendChild(tr);
+    tbody.appendChild(tr);
   }
-  table.appendChild(body);
+  table.appendChild(tbody);
 }
-
-function encodeId(str) { return str.replace(/[^a-zA-Z0-9]/g, c => '_' + c.charCodeAt(0) + '_'); }
-
-function getDCard(p, i) { return document.getElementById(`dcard-${encodeId(p)}-${i}`); }
 
 function revealCard(p, rank) {
   if (revealedSet[p][rank]) return;
-  revealedSet[p][rank] = true;
   const horse = draftData[p][rank];
   if (!horse) return;
 
   const isDup = revealedHorses[horse] !== undefined;
   if (!isDup) revealedHorses[horse] = p;
+  revealedSet[p][rank] = true;
 
   const card = getDCard(p, rank);
-  card.classList.add('revealed');
-  card.classList.add(isDup ? 'dup' : 'ok');
+  card.classList.add('revealed', isDup ? 'dup' : 'ok');
   card.innerHTML = `<span class="card-mark">${isDup ? '😇' : '🎯'}</span><span class="card-name">${horse}</span>`;
+
   updateStats();
+  saveState();
 }
 
 function updateStats() {
@@ -464,9 +413,11 @@ function updateStats() {
 }
 
 function resetAll() {
-  if (!confirm('最初からやり直しますか？すべてのデータが消えます。')) return;
-  draftData = {}; revealedHorses = {}; revealedSet = {}; participants = [];
+  if (!confirm('最初からやり直しますか？保存データもすべて消えます。')) return;
+  clearSaved();
+  participants = []; draftData = {}; revealedHorses = {}; revealedSet = {}; currentStep = 'setup';
   document.getElementById('draft').style.display = 'none';
+  document.getElementById('register').style.display = 'none';
   document.getElementById('setup').style.display = 'block';
   renderTags();
 }
