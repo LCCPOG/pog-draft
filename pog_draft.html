@@ -150,6 +150,7 @@
     <div class="stats" id="stats" style="margin:0;"></div>
     <div class="toolbar-sep"></div>
     <button onclick="backToRegister()">← 馬名登録に戻る</button>
+    <button class="btn-primary" id="save-img-btn" onclick="saveImage()">📷 画像で保存</button>
     <button class="btn-danger" onclick="resetAll()">最初からやり直す</button>
   </div>
   <div class="legend">
@@ -410,6 +411,83 @@ function updateStats() {
     `<div class="stat">めくり済み　<b>${revealed} / ${total}</b></div>` +
     `<div class="stat ok-stat">🎯 当選　<b>${wins}</b></div>` +
     `<div class="stat dup-stat">😇 重複　<b>${dups}</b></div>`;
+}
+
+function saveImage() {
+  const btn = document.getElementById('save-img-btn');
+  btn.textContent = '生成中...';
+  btn.disabled = true;
+
+  // キャプチャ対象：テーブル全体を含むラッパーを作成
+  const table = document.getElementById('draft-table');
+
+  // ラッパーdivを作って見やすくする
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'background:#0f1117;padding:24px;display:inline-block;font-family:sans-serif;';
+
+  // タイトル
+  const title = document.createElement('div');
+  title.style.cssText = 'color:#f0c040;font-size:22px;font-weight:700;letter-spacing:2px;margin-bottom:16px;';
+  title.textContent = 'POG DRAFT 結果';
+  wrapper.appendChild(title);
+
+  // 凡例
+  const legend = document.createElement('div');
+  legend.style.cssText = 'color:#7a7f9a;font-size:12px;margin-bottom:12px;';
+  legend.textContent = '🎯 当選　😇 ハズレ（重複）';
+  wrapper.appendChild(legend);
+
+  // テーブルのクローン
+  const clone = table.cloneNode(true);
+  clone.style.cssText = 'border-collapse:collapse;font-size:12px;color:#e8eaf0;';
+
+  // クローン内のth/tdにインラインスタイルを付与
+  clone.querySelectorAll('th').forEach(th => {
+    th.style.cssText = 'background:#1a1d27;color:#7a7f9a;padding:8px 10px;border:1px solid rgba(255,255,255,0.1);text-align:center;white-space:nowrap;font-size:11px;';
+  });
+  clone.querySelectorAll('td').forEach(td => {
+    td.style.cssText = 'padding:5px 6px;border:1px solid rgba(255,255,255,0.08);text-align:center;vertical-align:middle;background:#0f1117;';
+  });
+  clone.querySelectorAll('td:first-child').forEach(td => {
+    td.style.cssText = 'padding:5px 8px;border:1px solid rgba(255,255,255,0.08);background:#1a1d27;color:#7a7f9a;font-size:11px;font-weight:700;text-align:center;';
+  });
+  clone.querySelectorAll('.card').forEach(card => {
+    let bg = '#2a2e42', color = '#7a7f9a', border = 'rgba(255,255,255,0.08)';
+    if (card.classList.contains('ok'))  { bg = 'rgba(62,207,142,0.1)'; color = '#3ecf8e'; border = 'rgba(62,207,142,0.3)'; }
+    if (card.classList.contains('dup')) { bg = 'rgba(232,80,80,0.1)';  color = '#e85050'; border = 'rgba(232,80,80,0.3)'; }
+    card.style.cssText = `background:${bg};color:${color};border:1px solid ${border};border-radius:6px;padding:5px;font-size:11px;text-align:center;line-height:1.4;min-height:40px;display:flex;align-items:center;justify-content:center;`;
+  });
+  wrapper.appendChild(clone);
+
+  document.body.appendChild(wrapper);
+
+  import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js').then(mod => {
+    const h2c = mod.default;
+    h2c(wrapper, {
+      backgroundColor: '#0f1117',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    }).then(canvas => {
+      document.body.removeChild(wrapper);
+      const link = document.createElement('a');
+      link.download = 'pog_draft_result.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      btn.textContent = '📷 画像で保存';
+      btn.disabled = false;
+    }).catch(() => {
+      document.body.removeChild(wrapper);
+      alert('画像の生成に失敗しました。');
+      btn.textContent = '📷 画像で保存';
+      btn.disabled = false;
+    });
+  }).catch(() => {
+    document.body.removeChild(wrapper);
+    alert('ライブラリの読み込みに失敗しました。');
+    btn.textContent = '📷 画像で保存';
+    btn.disabled = false;
+  });
 }
 
 function resetAll() {
