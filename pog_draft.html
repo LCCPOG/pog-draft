@@ -4,129 +4,377 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>POG ドラフト発表ツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Bebas+Neue&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── Pinterest DESIGN.md tokens ── */
   :root {
-    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a;
-    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
-    --text: #e8eaf0; --muted: #7a7f9a; --accent: #f0c040;
-    --ok: #3ecf8e; --ok-bg: rgba(62,207,142,0.1); --ok-border: rgba(62,207,142,0.3);
-    --dup: #e85050; --dup-bg: rgba(232,80,80,0.1); --dup-border: rgba(232,80,80,0.3);
-    --hidden: #2a2e42; --radius: 8px; --radius-lg: 12px;
+    --primary: #e60023;
+    --primary-pressed: #cc001f;
+    --ink: #000000;
+    --ink-soft: #211922;
+    --body: #33332e;
+    --mute: #62625b;
+    --ash: #91918c;
+    --stone: #c8c8c1;
+    --hairline: #dadad3;
+    --hairline-soft: #e5e5e0;
+    --canvas: #ffffff;
+    --surface-soft: #fbfbf9;
+    --surface-card: #f6f6f3;
+    --secondary-bg: #e5e5e0;
+    --success-deep: #103c25;
+    --success-pale: #c7f0da;
+    --error: #9e0a0a;
+    --r-sm: 8px;
+    --r-md: 16px;
+    --r-lg: 32px;
+    --r-full: 9999px;
   }
-  body { background: var(--bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; min-height: 100vh; font-size: 14px; line-height: 1.6; }
 
-  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
-  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
-  .subtitle { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-  .header-right { margin-left: auto; }
-  .save-badge { font-size: 11px; color: var(--ok); background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 20px; padding: 3px 10px; opacity: 0; transition: opacity 0.4s; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--surface-soft);
+    color: var(--body);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  /* ── NAV ── */
+  header {
+    background: var(--canvas);
+    border-bottom: 1px solid var(--hairline);
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    border-radius: var(--r-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.5px;
+  }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .save-badge {
+    font-size: 12px;
+    color: var(--success-deep);
+    background: var(--success-pale);
+    border-radius: var(--r-full);
+    padding: 4px 12px;
+    opacity: 0;
+    transition: opacity 0.4s;
+    font-weight: 600;
+  }
   .save-badge.show { opacity: 1; }
 
-  #setup { max-width: 640px; margin: 40px auto; padding: 0 20px; }
-  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-  .card-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .field label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  /* ── BUTTONS ── */
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--r-full);
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+    line-height: 1;
+  }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  input[type="number"], input[type="text"], select { background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 14px; padding: 9px 12px; width: 100%; outline: none; transition: border-color 0.2s; }
-  input:focus, select:focus { border-color: var(--accent); }
-  .add-row { display: flex; gap: 8px; margin-bottom: 10px; }
-  .add-row input { flex: 1; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-pressed); }
+  .btn-secondary { background: var(--secondary-bg); color: var(--ink); }
+  .btn-secondary:hover { background: var(--stone); }
+  .btn-ghost { background: transparent; color: var(--ink); border: 2px solid var(--hairline); }
+  .btn-ghost:hover { background: var(--surface-card); }
+  .btn-success { background: var(--success-deep); color: #fff; }
+  .btn-success:hover { background: #1a5c39; }
+  .btn-danger { background: transparent; color: var(--error); border: 2px solid var(--hairline); }
+  .btn-danger:hover { background: #fce8e8; border-color: var(--error); }
 
-  button { background: transparent; border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 13px; padding: 9px 16px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
-  button:hover { background: var(--surface2); }
-  button:active { transform: scale(0.98); }
-  button:disabled { opacity: 0.35; cursor: not-allowed; }
-  .btn-primary { background: var(--accent); border-color: var(--accent); color: #111; font-weight: 700; }
-  .btn-primary:hover { background: #f5d060; border-color: #f5d060; }
-  .btn-danger { border-color: var(--dup-border); color: var(--dup); }
-  .btn-danger:hover { background: var(--dup-bg); }
-  .btn-success { background: var(--ok); border-color: var(--ok); color: #111; font-weight: 700; }
-  .btn-success:hover { background: #5ddfa5; }
+  /* ── INPUTS ── */
+  input[type="number"], input[type="text"] {
+    background: var(--canvas);
+    border: 1px solid var(--ash);
+    border-radius: var(--r-md);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 11px 15px;
+    width: 100%;
+    outline: none;
+    transition: border 0.15s, box-shadow 0.15s;
+    height: 44px;
+  }
+  input:focus {
+    border: 2px solid var(--ink);
+    box-shadow: 0 0 0 4px rgba(67,94,229,0.25);
+  }
+
+  /* ── SETUP ── */
+  #setup { max-width: 560px; margin: 40px auto; padding: 0 20px; }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--mute);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .card-box {
+    background: var(--canvas);
+    border-radius: var(--r-lg);
+    padding: 24px;
+    margin-bottom: 16px;
+    border: 1px solid var(--hairline-soft);
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--mute); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .add-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .add-row input { flex: 1; border-radius: var(--r-full); }
+  .add-row button { border-radius: var(--r-full); }
 
   .tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; }
-  .tag { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 10px 4px 12px; font-size: 13px; }
-  .tag-x { background: none; border: none; color: var(--muted); font-size: 16px; padding: 0; cursor: pointer; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; }
-  .tag-x:hover { color: var(--dup); }
-  #setup-start-btn { width: 100%; padding: 12px; font-size: 15px; margin-top: 4px; }
+  .tag {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-full);
+    padding: 5px 6px 5px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .tag-x {
+    background: var(--secondary-bg); border: none; color: var(--mute);
+    font-size: 13px; line-height: 1; cursor: pointer;
+    width: 22px; height: 22px; border-radius: var(--r-full);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+  .tag-x:hover { background: var(--stone); color: var(--ink); transform: none; }
 
-  .resume-box { background: var(--surface2); border: 1px solid var(--accent); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 16px; display: none; }
-  .resume-box p { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
-  .resume-box b { color: var(--accent); }
+  #setup-start-btn { width: 100%; padding: 14px; font-size: 15px; border-radius: var(--r-full); }
+
+  .resume-box {
+    background: var(--canvas);
+    border: 2px solid var(--primary);
+    border-radius: var(--r-lg);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .resume-box p { font-size: 13px; color: var(--mute); margin-bottom: 12px; }
+  .resume-box strong { color: var(--primary); }
   .resume-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 
-  #register { display: none; padding: 16px 20px; }
-  #draft { display: none; padding: 16px 20px; }
+  /* ── COMMON SCREEN ── */
+  #register, #draft { display: none; padding: 20px; }
 
-  .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 16px; }
+  .toolbar {
+    background: var(--canvas);
+    border: 1px solid var(--hairline-soft);
+    border-radius: var(--r-lg);
+    padding: 14px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
   .toolbar-sep { flex: 1; }
-  .reg-progress { font-size: 12px; color: var(--muted); }
-  .reg-progress b { color: var(--accent); }
 
-  .stats { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
-  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 14px; font-size: 12px; color: var(--muted); }
-  .stat b { color: var(--text); font-weight: 700; }
-  .stat.ok-stat { border-color: var(--ok-border); }
-  .stat.ok-stat b { color: var(--ok); }
-  .stat.dup-stat { border-color: var(--dup-border); }
-  .stat.dup-stat b { color: var(--dup); }
-  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 14px; flex-wrap: wrap; padding: 0 4px; }
+  .reg-progress { font-size: 13px; color: var(--mute); font-weight: 600; }
+  .reg-progress b { color: var(--primary); }
 
-  .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); max-height: calc(100vh - 240px); }
+  /* ── STATS ── */
+  .stats { display: flex; gap: 8px; flex-wrap: wrap; }
+  .stat {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-full);
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mute);
+  }
+  .stat b { color: var(--ink); }
+  .stat.ok-stat b { color: var(--success-deep); }
+  .stat.dup-stat b { color: var(--error); }
+
+  .legend {
+    display: flex; gap: 16px; font-size: 12px;
+    color: var(--mute); margin-bottom: 14px;
+    flex-wrap: wrap; padding: 0 4px;
+    font-weight: 600;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    overflow: auto;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    max-height: calc(100vh - 250px);
+    background: var(--canvas);
+  }
   table { border-collapse: collapse; min-width: 100%; }
-  thead th { background: var(--surface); position: sticky; top: 0; z-index: 3; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding: 10px 8px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border2); white-space: nowrap; text-align: center; }
-  thead th:first-child { left: 0; z-index: 4; min-width: 48px; }
-  tbody td { padding: 5px 6px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
-  tbody td:first-child { position: sticky; left: 0; z-index: 1; background: var(--surface); font-size: 11px; color: var(--muted); font-weight: 700; border-right: 1px solid var(--border2); padding: 5px 8px; min-width: 48px; }
+
+  thead th {
+    background: var(--surface-card);
+    position: sticky; top: 0; z-index: 3;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    color: var(--mute);
+    padding: 12px 8px;
+    border-right: 1px solid var(--hairline-soft);
+    border-bottom: 1px solid var(--hairline);
+    white-space: nowrap;
+    text-align: center;
+  }
+  thead th:first-child { left: 0; z-index: 4; min-width: 52px; }
+
+  tbody td {
+    padding: 5px 6px;
+    border-right: 1px solid var(--hairline-soft);
+    border-bottom: 1px solid var(--hairline-soft);
+    text-align: center;
+    vertical-align: middle;
+  }
+  tbody td:first-child {
+    position: sticky; left: 0; z-index: 1;
+    background: var(--surface-card);
+    font-size: 11px; color: var(--mute); font-weight: 700;
+    border-right: 1px solid var(--hairline);
+    padding: 5px 8px; min-width: 52px;
+  }
   tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--surface-soft); }
+  tbody tr:hover td:first-child { background: var(--surface-card); }
 
-  .reg-input { width: 100%; min-width: 80px; max-width: 130px; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text); font-family: inherit; font-size: 12px; padding: 6px 8px; outline: none; text-align: center; transition: border-color 0.2s; display: block; margin: auto; }
-  .reg-input:focus { border-color: var(--accent); background: var(--surface2); }
-  .reg-input.filled { border-color: var(--ok-border); color: var(--ok); }
+  /* ── REG INPUT ── */
+  .reg-input {
+    width: 100%; min-width: 80px; max-width: 130px;
+    background: var(--surface-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    color: var(--ink);
+    font-family: inherit; font-size: 12px; font-weight: 600;
+    padding: 7px 8px;
+    outline: none; text-align: center;
+    transition: border 0.15s, box-shadow 0.15s;
+    display: block; margin: auto; height: auto;
+  }
+  .reg-input:focus {
+    border: 2px solid var(--ink);
+    box-shadow: 0 0 0 3px rgba(67,94,229,0.2);
+    background: var(--canvas);
+  }
+  .reg-input.filled {
+    border-color: var(--success-deep);
+    color: var(--success-deep);
+    background: var(--success-pale);
+  }
 
-  .card { min-width: 90px; max-width: 130px; width: 100%; min-height: 52px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--hidden); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--muted); transition: background 0.15s, transform 0.12s; padding: 6px; word-break: break-all; line-height: 1.4; text-align: center; margin: auto; user-select: none; }
-  .card:hover:not(.revealed):not(.empty) { background: var(--surface2); border-color: var(--border2); transform: scale(1.04); }
+  /* ── DRAFT CARD ── */
+  .card {
+    min-width: 88px; max-width: 128px; width: 100%;
+    min-height: 52px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--hairline);
+    background: var(--surface-card);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--ash);
+    transition: background 0.12s, transform 0.1s, box-shadow 0.12s;
+    padding: 6px; word-break: break-all;
+    line-height: 1.4; text-align: center; margin: auto;
+    user-select: none;
+  }
+  .card:hover:not(.revealed):not(.empty) {
+    background: var(--secondary-bg);
+    border-color: var(--stone);
+    transform: scale(1.04);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
   .card.revealed { cursor: default; font-size: 12px; }
-  .card.empty { opacity: 0.25; cursor: default; }
-  .card.ok { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok); }
-  .card.dup { background: var(--dup-bg); border-color: var(--dup-border); color: var(--dup); }
+  .card.empty { opacity: 0.3; cursor: default; font-size: 16px; }
+  .card.ok {
+    background: var(--success-pale);
+    border-color: #6cc49a;
+    color: var(--success-deep);
+    font-weight: 700;
+  }
+  .card.dup {
+    background: #fce8e8;
+    border-color: #e8a0a0;
+    color: var(--error);
+    font-weight: 700;
+  }
   .card-mark { font-size: 14px; display: block; }
-  .card-name { font-size: 11px; display: block; margin-top: 1px; }
+  .card-name { font-size: 11px; display: block; margin-top: 2px; font-weight: 700; }
 </style>
 </head>
 <body>
 
 <header>
-  <div>
-    <div class="logo">POG DRAFT</div>
-    <div class="subtitle">発表ツール</div>
+  <div class="logo">
+    <div class="logo-icon">P</div>
+    <span class="logo-text">POG Draft</span>
   </div>
   <div class="header-right">
-    <span class="save-badge" id="save-badge">保存しました</span>
+    <span class="save-badge" id="save-badge">✓ 保存しました</span>
   </div>
 </header>
 
 <!-- STEP 1 -->
 <div id="setup">
   <div class="resume-box" id="resume-box">
-    <p>前回の途中データが見つかりました。<br><b id="resume-info"></b></p>
+    <p>前回の途中データが見つかりました。<br><strong id="resume-info"></strong></p>
     <div class="resume-btns">
       <button class="btn-primary" onclick="resumeSession()">続きから再開する</button>
-      <button class="btn-danger" onclick="clearSaved()">新しくはじめる</button>
+      <button class="btn-ghost" onclick="clearSaved()">新しくはじめる</button>
     </div>
   </div>
   <div class="card-box">
-    <div class="section-title">基本設定</div>
+    <div class="section-label">基本設定</div>
     <div class="row2">
       <div class="field"><label>参加者数上限</label><input type="number" id="max-p" value="15" min="2" max="15"></div>
       <div class="field"><label>指名馬数（1人あたり）</label><input type="number" id="max-h" value="15" min="1" max="15"></div>
     </div>
-    <div class="section-title">参加者</div>
+    <div class="section-label">参加者</div>
     <div class="add-row">
       <input type="text" id="p-input" placeholder="参加者名を入力..." maxlength="20">
-      <button id="add-p-btn">追加</button>
+      <button class="btn-secondary" id="add-p-btn">追加</button>
     </div>
     <div class="tags" id="tags"></div>
   </div>
@@ -138,7 +386,7 @@
   <div class="toolbar">
     <span class="reg-progress">入力済み：<b id="reg-count">0</b> / <span id="reg-total">0</span></span>
     <div class="toolbar-sep"></div>
-    <button onclick="backToSetup()">← 参加者設定に戻る</button>
+    <button class="btn-ghost" onclick="backToSetup()">← 参加者設定</button>
     <button class="btn-success" id="draft-start-btn" disabled>ドラフト開始 →</button>
   </div>
   <div class="table-wrap"><table id="reg-table"></table></div>
@@ -147,11 +395,11 @@
 <!-- STEP 3 -->
 <div id="draft">
   <div class="toolbar">
-    <div class="stats" id="stats" style="margin:0;"></div>
+    <div class="stats" id="stats"></div>
     <div class="toolbar-sep"></div>
-    <button onclick="backToRegister()">← 馬名登録に戻る</button>
-    <button class="btn-primary" id="save-img-btn" onclick="saveImage()">📷 画像で保存</button>
-    <button class="btn-danger" onclick="resetAll()">最初からやり直す</button>
+    <button class="btn-secondary" id="save-img-btn" onclick="saveImage()">📷 画像で保存</button>
+    <button class="btn-ghost" onclick="backToRegister()">← 馬名登録</button>
+    <button class="btn-danger" onclick="resetAll()">やり直す</button>
   </div>
   <div class="legend">
     <span>🎯 当選（他に指名なし）</span>
@@ -163,15 +411,8 @@
 
 <script>
 const STORAGE_KEY = 'pog_draft_v1';
+let participants = [], maxH = 15, draftData = {}, revealedHorses = {}, revealedSet = {}, currentStep = 'setup';
 
-let participants = [];
-let maxH = 15;
-let draftData = {};       // {player: [horseName, ...]}
-let revealedHorses = {};  // {horseName: playerName} 最初に出た人を記録
-let revealedSet = {};     // {player: [bool, ...]}
-let currentStep = 'setup';
-
-// ── 保存 ──
 function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ participants, maxH, draftData, revealedHorses, revealedSet, currentStep }));
@@ -180,44 +421,29 @@ function saveState() {
     setTimeout(() => b.classList.remove('show'), 1800);
   } catch(e) {}
 }
+function loadState() { try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
+function clearSaved() { try { localStorage.removeItem(STORAGE_KEY); } catch(e) {} document.getElementById('resume-box').style.display = 'none'; }
 
-function loadState() {
-  try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; }
-}
-
-function clearSaved() {
-  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-  document.getElementById('resume-box').style.display = 'none';
-}
-
-// ── 起動 ──
 window.addEventListener('load', () => {
   const s = loadState();
   if (s && s.participants && s.participants.length > 0) {
-    const stepNames = { setup: '参加者設定', register: '馬名登録中', draft: 'ドラフト発表中' };
-    document.getElementById('resume-info').textContent =
-      `参加者 ${s.participants.length}人 / ${s.maxH}頭 / ${stepNames[s.currentStep] || ''}`;
+    const names = { setup: '参加者設定', register: '馬名登録中', draft: 'ドラフト発表中' };
+    document.getElementById('resume-info').textContent = `参加者 ${s.participants.length}人 / ${s.maxH}頭 / ${names[s.currentStep] || ''}`;
     document.getElementById('resume-box').style.display = 'block';
   }
 });
 
 function resumeSession() {
-  const s = loadState();
-  if (!s) return;
-  participants = s.participants;
-  maxH = s.maxH;
-  draftData = s.draftData;
-  revealedHorses = s.revealedHorses || {};
-  revealedSet = s.revealedSet || {};
-  currentStep = s.currentStep;
+  const s = loadState(); if (!s) return;
+  participants = s.participants; maxH = s.maxH; draftData = s.draftData;
+  revealedHorses = s.revealedHorses || {}; revealedSet = s.revealedSet || {}; currentStep = s.currentStep;
   document.getElementById('max-p').value = participants.length;
   document.getElementById('max-h').value = maxH;
   renderTags();
-  if (currentStep === 'draft') showDraft();
-  else showRegister();
+  if (currentStep === 'draft') showDraft(); else showRegister();
 }
 
-// ── STEP1 ──
+// STEP1
 const pInput = document.getElementById('p-input');
 const tagsEl = document.getElementById('tags');
 const setupStartBtn = document.getElementById('setup-start-btn');
@@ -225,14 +451,12 @@ const setupStartBtn = document.getElementById('setup-start-btn');
 function renderTags() {
   tagsEl.innerHTML = '';
   participants.forEach((p, i) => {
-    const t = document.createElement('div');
-    t.className = 'tag';
+    const t = document.createElement('div'); t.className = 'tag';
     t.innerHTML = `<span>${p}</span><button class="tag-x" onclick="removeP(${i})">×</button>`;
     tagsEl.appendChild(t);
   });
   setupStartBtn.disabled = participants.length < 2;
 }
-
 function removeP(i) { participants.splice(i, 1); renderTags(); }
 
 document.getElementById('add-p-btn').addEventListener('click', () => {
@@ -241,9 +465,7 @@ document.getElementById('add-p-btn').addEventListener('click', () => {
   if (!v) return;
   if (participants.length >= maxP) { alert(`参加者は${maxP}人までです`); return; }
   if (participants.includes(v)) { alert('同じ名前の参加者が既にいます'); return; }
-  participants.push(v);
-  pInput.value = '';
-  renderTags();
+  participants.push(v); pInput.value = ''; renderTags();
 });
 pInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('add-p-btn').click(); });
 
@@ -255,32 +477,27 @@ setupStartBtn.addEventListener('click', () => {
 });
 
 function backToSetup() {
-  currentStep = 'setup';
-  saveState();
+  currentStep = 'setup'; saveState();
   document.getElementById('register').style.display = 'none';
   document.getElementById('setup').style.display = 'block';
 }
 
-// ── STEP2 ──
+// STEP2
 function showRegister() {
   currentStep = 'register';
   document.getElementById('setup').style.display = 'none';
   document.getElementById('draft').style.display = 'none';
   document.getElementById('register').style.display = 'block';
-  buildRegTable();
-  updateRegProgress();
-  saveState();
+  buildRegTable(); updateRegProgress(); saveState();
 }
 
 function buildRegTable() {
-  const table = document.getElementById('reg-table');
-  table.innerHTML = '';
+  const table = document.getElementById('reg-table'); table.innerHTML = '';
   const thead = document.createElement('thead');
   const hr = document.createElement('tr');
   const th0 = document.createElement('th'); th0.textContent = '順位'; hr.appendChild(th0);
   participants.forEach(p => { const th = document.createElement('th'); th.textContent = p; hr.appendChild(th); });
   thead.appendChild(hr); table.appendChild(thead);
-
   const tbody = document.createElement('tbody');
   for (let i = 0; i < maxH; i++) {
     const tr = document.createElement('tr');
@@ -294,8 +511,7 @@ function buildRegTable() {
       inp.addEventListener('input', () => {
         draftData[p][i] = inp.value.trim();
         inp.classList.toggle('filled', !!inp.value.trim());
-        updateRegProgress();
-        saveState();
+        updateRegProgress(); saveState();
       });
       inp.addEventListener('keydown', e => {
         if (e.key === 'Enter') {
@@ -322,39 +538,32 @@ function updateRegProgress() {
 document.getElementById('draft-start-btn').addEventListener('click', () => {
   const empty = participants.some(p => draftData[p].some(h => !h));
   if (empty && !confirm('未入力の馬名があります。このままドラフトを開始しますか？')) return;
-  revealedHorses = {};
-  revealedSet = {};
+  revealedHorses = {}; revealedSet = {};
   participants.forEach(p => { revealedSet[p] = Array(maxH).fill(false); });
   showDraft();
 });
 
-function backToRegister() {
-  showRegister();
-}
+function backToRegister() { showRegister(); }
 
-// ── STEP3 ──
+// STEP3
 function showDraft() {
   currentStep = 'draft';
   document.getElementById('register').style.display = 'none';
   document.getElementById('setup').style.display = 'none';
   document.getElementById('draft').style.display = 'block';
-  buildDraftTable();
-  updateStats();
-  saveState();
+  buildDraftTable(); updateStats(); saveState();
 }
 
 function encodeId(str) { return str.replace(/[^a-zA-Z0-9]/g, c => '_' + c.charCodeAt(0) + '_'); }
 function getDCard(p, i) { return document.getElementById(`dc_${encodeId(p)}_${i}`); }
 
 function buildDraftTable() {
-  const table = document.getElementById('draft-table');
-  table.innerHTML = '';
+  const table = document.getElementById('draft-table'); table.innerHTML = '';
   const thead = document.createElement('thead');
   const hr = document.createElement('tr');
   const th0 = document.createElement('th'); th0.textContent = '順位'; hr.appendChild(th0);
   participants.forEach(p => { const th = document.createElement('th'); th.textContent = p; hr.appendChild(th); });
   thead.appendChild(hr); table.appendChild(thead);
-
   const tbody = document.createElement('tbody');
   for (let i = 0; i < maxH; i++) {
     const tr = document.createElement('tr');
@@ -362,21 +571,16 @@ function buildDraftTable() {
     participants.forEach(p => {
       const td = document.createElement('td');
       const card = document.createElement('div');
-      card.className = 'card';
-      card.id = `dc_${encodeId(p)}_${i}`;
+      card.className = 'card'; card.id = `dc_${encodeId(p)}_${i}`;
       const horse = draftData[p][i];
-
       if (!horse) {
-        card.classList.add('empty');
-        card.textContent = '－';
+        card.classList.add('empty'); card.textContent = '－';
       } else if (revealedSet[p] && revealedSet[p][i]) {
-        // 再開時：すでにめくり済み
         const isDup = revealedHorses[horse] !== p;
         card.classList.add('revealed', isDup ? 'dup' : 'ok');
         card.innerHTML = `<span class="card-mark">${isDup ? '😇' : '🎯'}</span><span class="card-name">${horse}</span>`;
       } else {
-        card.textContent = '🂠';
-        card.addEventListener('click', () => revealCard(p, i));
+        card.textContent = '🂠'; card.addEventListener('click', () => revealCard(p, i));
       }
       td.appendChild(card); tr.appendChild(td);
     });
@@ -387,19 +591,14 @@ function buildDraftTable() {
 
 function revealCard(p, rank) {
   if (revealedSet[p][rank]) return;
-  const horse = draftData[p][rank];
-  if (!horse) return;
-
+  const horse = draftData[p][rank]; if (!horse) return;
   const isDup = revealedHorses[horse] !== undefined;
   if (!isDup) revealedHorses[horse] = p;
   revealedSet[p][rank] = true;
-
   const card = getDCard(p, rank);
   card.classList.add('revealed', isDup ? 'dup' : 'ok');
   card.innerHTML = `<span class="card-mark">${isDup ? '😇' : '🎯'}</span><span class="card-name">${horse}</span>`;
-
-  updateStats();
-  saveState();
+  updateStats(); saveState();
 }
 
 function updateStats() {
@@ -413,83 +612,6 @@ function updateStats() {
     `<div class="stat dup-stat">😇 重複　<b>${dups}</b></div>`;
 }
 
-function saveImage() {
-  const btn = document.getElementById('save-img-btn');
-  btn.textContent = '生成中...';
-  btn.disabled = true;
-
-  // キャプチャ対象：テーブル全体を含むラッパーを作成
-  const table = document.getElementById('draft-table');
-
-  // ラッパーdivを作って見やすくする
-  const wrapper = document.createElement('div');
-  wrapper.style.cssText = 'background:#0f1117;padding:24px;display:inline-block;font-family:sans-serif;';
-
-  // タイトル
-  const title = document.createElement('div');
-  title.style.cssText = 'color:#f0c040;font-size:22px;font-weight:700;letter-spacing:2px;margin-bottom:16px;';
-  title.textContent = 'POG DRAFT 結果';
-  wrapper.appendChild(title);
-
-  // 凡例
-  const legend = document.createElement('div');
-  legend.style.cssText = 'color:#7a7f9a;font-size:12px;margin-bottom:12px;';
-  legend.textContent = '🎯 当選　😇 ハズレ（重複）';
-  wrapper.appendChild(legend);
-
-  // テーブルのクローン
-  const clone = table.cloneNode(true);
-  clone.style.cssText = 'border-collapse:collapse;font-size:12px;color:#e8eaf0;';
-
-  // クローン内のth/tdにインラインスタイルを付与
-  clone.querySelectorAll('th').forEach(th => {
-    th.style.cssText = 'background:#1a1d27;color:#7a7f9a;padding:8px 10px;border:1px solid rgba(255,255,255,0.1);text-align:center;white-space:nowrap;font-size:11px;';
-  });
-  clone.querySelectorAll('td').forEach(td => {
-    td.style.cssText = 'padding:5px 6px;border:1px solid rgba(255,255,255,0.08);text-align:center;vertical-align:middle;background:#0f1117;';
-  });
-  clone.querySelectorAll('td:first-child').forEach(td => {
-    td.style.cssText = 'padding:5px 8px;border:1px solid rgba(255,255,255,0.08);background:#1a1d27;color:#7a7f9a;font-size:11px;font-weight:700;text-align:center;';
-  });
-  clone.querySelectorAll('.card').forEach(card => {
-    let bg = '#2a2e42', color = '#7a7f9a', border = 'rgba(255,255,255,0.08)';
-    if (card.classList.contains('ok'))  { bg = 'rgba(62,207,142,0.1)'; color = '#3ecf8e'; border = 'rgba(62,207,142,0.3)'; }
-    if (card.classList.contains('dup')) { bg = 'rgba(232,80,80,0.1)';  color = '#e85050'; border = 'rgba(232,80,80,0.3)'; }
-    card.style.cssText = `background:${bg};color:${color};border:1px solid ${border};border-radius:6px;padding:5px;font-size:11px;text-align:center;line-height:1.4;min-height:40px;display:flex;align-items:center;justify-content:center;`;
-  });
-  wrapper.appendChild(clone);
-
-  document.body.appendChild(wrapper);
-
-  import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js').then(mod => {
-    const h2c = mod.default;
-    h2c(wrapper, {
-      backgroundColor: '#0f1117',
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    }).then(canvas => {
-      document.body.removeChild(wrapper);
-      const link = document.createElement('a');
-      link.download = 'pog_draft_result.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      btn.textContent = '📷 画像で保存';
-      btn.disabled = false;
-    }).catch(() => {
-      document.body.removeChild(wrapper);
-      alert('画像の生成に失敗しました。');
-      btn.textContent = '📷 画像で保存';
-      btn.disabled = false;
-    });
-  }).catch(() => {
-    document.body.removeChild(wrapper);
-    alert('ライブラリの読み込みに失敗しました。');
-    btn.textContent = '📷 画像で保存';
-    btn.disabled = false;
-  });
-}
-
 function resetAll() {
   if (!confirm('最初からやり直しますか？保存データもすべて消えます。')) return;
   clearSaved();
@@ -498,6 +620,59 @@ function resetAll() {
   document.getElementById('register').style.display = 'none';
   document.getElementById('setup').style.display = 'block';
   renderTags();
+}
+
+// 画像保存
+function saveImage() {
+  const btn = document.getElementById('save-img-btn');
+  btn.textContent = '生成中...'; btn.disabled = true;
+
+  const table = document.getElementById('draft-table');
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'background:#fbfbf9;padding:28px;display:inline-block;font-family:sans-serif;';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:6px;';
+  title.innerHTML = `<div style="width:28px;height:28px;background:#e60023;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:15px;">P</div><span style="font-size:20px;font-weight:700;color:#000;letter-spacing:-0.5px;">POG Draft 結果</span>`;
+  wrapper.appendChild(title);
+
+  const legend = document.createElement('div');
+  legend.style.cssText = 'font-size:12px;color:#62625b;margin-bottom:14px;font-weight:600;';
+  legend.textContent = '🎯 当選（他に指名なし）　😇 ハズレ（重複）';
+  wrapper.appendChild(legend);
+
+  const clone = table.cloneNode(true);
+  clone.style.cssText = 'border-collapse:collapse;font-size:12px;color:#33332e;background:#ffffff;border-radius:16px;overflow:hidden;';
+  clone.querySelectorAll('th').forEach(th => {
+    th.style.cssText = 'background:#f6f6f3;color:#62625b;padding:10px 8px;border:1px solid #dadad3;text-align:center;white-space:nowrap;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;';
+  });
+  clone.querySelectorAll('td').forEach(td => {
+    td.style.cssText = 'padding:5px 6px;border:1px solid #e5e5e0;text-align:center;vertical-align:middle;background:#ffffff;';
+  });
+  clone.querySelectorAll('td:first-child').forEach(td => {
+    td.style.cssText = 'padding:5px 8px;border:1px solid #dadad3;background:#f6f6f3;color:#62625b;font-size:11px;font-weight:700;text-align:center;';
+  });
+  clone.querySelectorAll('.card').forEach(card => {
+    let bg = '#f6f6f3', color = '#91918c', border = '#dadad3';
+    if (card.classList.contains('ok'))  { bg = '#c7f0da'; color = '#103c25'; border = '#6cc49a'; }
+    if (card.classList.contains('dup')) { bg = '#fce8e8'; color = '#9e0a0a'; border = '#e8a0a0'; }
+    if (card.classList.contains('empty')) { bg = '#f6f6f3'; color = '#c8c8c1'; }
+    card.style.cssText = `background:${bg};color:${color};border:1px solid ${border};border-radius:10px;padding:5px 4px;font-size:11px;font-weight:700;text-align:center;line-height:1.4;min-height:40px;display:flex;align-items:center;justify-content:center;flex-direction:column;`;
+  });
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js').then(mod => {
+    mod.default(wrapper, { backgroundColor: '#fbfbf9', scale: 2, useCORS: true, logging: false })
+    .then(canvas => {
+      document.body.removeChild(wrapper);
+      const link = document.createElement('a');
+      link.download = 'pog_draft_result.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      btn.textContent = '📷 画像で保存'; btn.disabled = false;
+    }).catch(() => { document.body.removeChild(wrapper); alert('画像の生成に失敗しました。'); btn.textContent = '📷 画像で保存'; btn.disabled = false; });
+  }).catch(() => { document.body.removeChild(wrapper); alert('ライブラリの読み込みに失敗しました。'); btn.textContent = '📷 画像で保存'; btn.disabled = false; });
 }
 </script>
 </body>
