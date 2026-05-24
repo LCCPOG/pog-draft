@@ -3,677 +3,1090 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POG ドラフト発表ツール</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
+<title>POG管理ツール</title>
 <style>
-  /* ── Pinterest DESIGN.md tokens ── */
-  :root {
-    --primary: #e60023;
-    --primary-pressed: #cc001f;
-    --ink: #000000;
-    --ink-soft: #211922;
-    --body: #33332e;
-    --mute: #62625b;
-    --ash: #91918c;
-    --stone: #c8c8c1;
-    --hairline: #dadad3;
-    --hairline-soft: #e5e5e0;
-    --canvas: #ffffff;
-    --surface-soft: #fbfbf9;
-    --surface-card: #f6f6f3;
-    --secondary-bg: #e5e5e0;
-    --success-deep: #103c25;
-    --success-pale: #c7f0da;
-    --error: #9e0a0a;
-    --r-sm: 8px;
-    --r-md: 16px;
-    --r-lg: 32px;
-    --r-full: 9999px;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--surface-soft);
-    color: var(--body);
-    font-family: 'Noto Sans JP', sans-serif;
-    min-height: 100vh;
-    font-size: 14px;
-    line-height: 1.4;
-  }
-
-  /* ── NAV ── */
-  header {
-    background: var(--canvas);
-    border-bottom: 1px solid var(--hairline);
-    padding: 0 24px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .logo-icon {
-    width: 32px;
-    height: 32px;
-    background: var(--primary);
-    border-radius: var(--r-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 700;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .logo-text {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--ink);
-    letter-spacing: -0.5px;
-  }
-  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-  .save-badge {
-    font-size: 12px;
-    color: var(--success-deep);
-    background: var(--success-pale);
-    border-radius: var(--r-full);
-    padding: 4px 12px;
-    opacity: 0;
-    transition: opacity 0.4s;
-    font-weight: 600;
-  }
-  .save-badge.show { opacity: 1; }
-
-  /* ── BUTTONS ── */
-  button {
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    border: none;
-    border-radius: var(--r-full);
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-    white-space: nowrap;
-    line-height: 1;
-  }
-  button:active { transform: scale(0.97); }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .btn-primary { background: var(--primary); color: #fff; }
-  .btn-primary:hover { background: var(--primary-pressed); }
-  .btn-secondary { background: var(--secondary-bg); color: var(--ink); }
-  .btn-secondary:hover { background: var(--stone); }
-  .btn-ghost { background: transparent; color: var(--ink); border: 2px solid var(--hairline); }
-  .btn-ghost:hover { background: var(--surface-card); }
-  .btn-success { background: var(--success-deep); color: #fff; }
-  .btn-success:hover { background: #1a5c39; }
-  .btn-danger { background: transparent; color: var(--error); border: 2px solid var(--hairline); }
-  .btn-danger:hover { background: #fce8e8; border-color: var(--error); }
-
-  /* ── INPUTS ── */
-  input[type="number"], input[type="text"] {
-    background: var(--canvas);
-    border: 1px solid var(--ash);
-    border-radius: var(--r-md);
-    color: var(--ink);
-    font-family: inherit;
-    font-size: 14px;
-    padding: 11px 15px;
-    width: 100%;
-    outline: none;
-    transition: border 0.15s, box-shadow 0.15s;
-    height: 44px;
-  }
-  input:focus {
-    border: 2px solid var(--ink);
-    box-shadow: 0 0 0 4px rgba(67,94,229,0.25);
-  }
-
-  /* ── SETUP ── */
-  #setup { max-width: 560px; margin: 40px auto; padding: 0 20px; }
-
-  .section-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--mute);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .card-box {
-    background: var(--canvas);
-    border-radius: var(--r-lg);
-    padding: 24px;
-    margin-bottom: 16px;
-    border: 1px solid var(--hairline-soft);
-  }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--mute); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-  .add-row { display: flex; gap: 8px; margin-bottom: 12px; }
-  .add-row input { flex: 1; border-radius: var(--r-full); }
-  .add-row button { border-radius: var(--r-full); }
-
-  .tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; }
-  .tag {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--surface-card);
-    border: 1px solid var(--hairline);
-    border-radius: var(--r-full);
-    padding: 5px 6px 5px 14px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink);
-  }
-  .tag-x {
-    background: var(--secondary-bg); border: none; color: var(--mute);
-    font-size: 13px; line-height: 1; cursor: pointer;
-    width: 22px; height: 22px; border-radius: var(--r-full);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700;
-  }
-  .tag-x:hover { background: var(--stone); color: var(--ink); transform: none; }
-
-  #setup-start-btn { width: 100%; padding: 14px; font-size: 15px; border-radius: var(--r-full); }
-
-  .resume-box {
-    background: var(--canvas);
-    border: 2px solid var(--primary);
-    border-radius: var(--r-lg);
-    padding: 20px 24px;
-    margin-bottom: 16px;
-    display: none;
-  }
-  .resume-box p { font-size: 13px; color: var(--mute); margin-bottom: 12px; }
-  .resume-box strong { color: var(--primary); }
-  .resume-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-
-  /* ── COMMON SCREEN ── */
-  #register, #draft { display: none; padding: 20px; }
-
-  .toolbar {
-    background: var(--canvas);
-    border: 1px solid var(--hairline-soft);
-    border-radius: var(--r-lg);
-    padding: 14px 20px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .toolbar-sep { flex: 1; }
-
-  .reg-progress { font-size: 13px; color: var(--mute); font-weight: 600; }
-  .reg-progress b { color: var(--primary); }
-
-  /* ── STATS ── */
-  .stats { display: flex; gap: 8px; flex-wrap: wrap; }
-  .stat {
-    background: var(--surface-card);
-    border: 1px solid var(--hairline);
-    border-radius: var(--r-full);
-    padding: 6px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--mute);
-  }
-  .stat b { color: var(--ink); }
-  .stat.ok-stat b { color: var(--success-deep); }
-  .stat.dup-stat b { color: var(--error); }
-
-  .legend {
-    display: flex; gap: 16px; font-size: 12px;
-    color: var(--mute); margin-bottom: 14px;
-    flex-wrap: wrap; padding: 0 4px;
-    font-weight: 600;
-  }
-
-  /* ── TABLE ── */
-  .table-wrap {
-    overflow: auto;
-    border: 1px solid var(--hairline);
-    border-radius: var(--r-lg);
-    max-height: calc(100vh - 250px);
-    background: var(--canvas);
-  }
-  table { border-collapse: collapse; min-width: 100%; }
-
-  thead th {
-    background: var(--surface-card);
-    position: sticky; top: 0; z-index: 3;
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 0.5px; text-transform: uppercase;
-    color: var(--mute);
-    padding: 12px 8px;
-    border-right: 1px solid var(--hairline-soft);
-    border-bottom: 1px solid var(--hairline);
-    white-space: nowrap;
-    text-align: center;
-  }
-  thead th:first-child { left: 0; z-index: 4; min-width: 52px; }
-
-  tbody td {
-    padding: 5px 6px;
-    border-right: 1px solid var(--hairline-soft);
-    border-bottom: 1px solid var(--hairline-soft);
-    text-align: center;
-    vertical-align: middle;
-  }
-  tbody td:first-child {
-    position: sticky; left: 0; z-index: 1;
-    background: var(--surface-card);
-    font-size: 11px; color: var(--mute); font-weight: 700;
-    border-right: 1px solid var(--hairline);
-    padding: 5px 8px; min-width: 52px;
-  }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: var(--surface-soft); }
-  tbody tr:hover td:first-child { background: var(--surface-card); }
-
-  /* ── REG INPUT ── */
-  .reg-input {
-    width: 100%; min-width: 80px; max-width: 130px;
-    background: var(--surface-soft);
-    border: 1px solid var(--hairline);
-    border-radius: var(--r-md);
-    color: var(--ink);
-    font-family: inherit; font-size: 12px; font-weight: 600;
-    padding: 7px 8px;
-    outline: none; text-align: center;
-    transition: border 0.15s, box-shadow 0.15s;
-    display: block; margin: auto; height: auto;
-  }
-  .reg-input:focus {
-    border: 2px solid var(--ink);
-    box-shadow: 0 0 0 3px rgba(67,94,229,0.2);
-    background: var(--canvas);
-  }
-  .reg-input.filled {
-    border-color: var(--success-deep);
-    color: var(--success-deep);
-    background: var(--success-pale);
-  }
-
-  /* ── DRAFT CARD ── */
-  .card {
-    min-width: 88px; max-width: 128px; width: 100%;
-    min-height: 52px;
-    border-radius: var(--r-md);
-    border: 1px solid var(--hairline);
-    background: var(--surface-card);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; color: var(--ash);
-    transition: background 0.12s, transform 0.1s, box-shadow 0.12s;
-    padding: 6px; word-break: break-all;
-    line-height: 1.4; text-align: center; margin: auto;
-    user-select: none;
-  }
-  .card:hover:not(.revealed):not(.empty) {
-    background: var(--secondary-bg);
-    border-color: var(--stone);
-    transform: scale(1.04);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
-  .card.revealed { cursor: default; font-size: 12px; }
-  .card.empty { opacity: 0.3; cursor: default; font-size: 16px; }
-  .card.ok {
-    background: var(--success-pale);
-    border-color: #6cc49a;
-    color: var(--success-deep);
-    font-weight: 700;
-  }
-  .card.dup {
-    background: #fce8e8;
-    border-color: #e8a0a0;
-    color: var(--error);
-    font-weight: 700;
-  }
-  .card-mark { font-size: 14px; display: block; }
-  .card-name { font-size: 11px; display: block; margin-top: 2px; font-weight: 700; }
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&family=Lora:wght@600&display=swap');
+:root{
+  --green:#00704A;
+  --green-light:#E3EFEA;
+  --green-mid:#1E8557;
+  --green-dark:#1E3932;
+  --gold:#CBA258;
+  --gold-light:#FFF8EE;
+  --bg:#F2F0EB;
+  --surface:#FFFFFF;
+  --border:#D4D0C8;
+  --text:#1E3932;
+  --text-muted:#7A7268;
+  --radius:12px;
+  --shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:var(--green-dark);color:#fff;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--gold)}
+header h1{font-size:18px;font-weight:700;letter-spacing:.06em;font-family:'Lora',serif}
+#sync-status{font-size:12px;opacity:.8;display:flex;align-items:center;gap:6px}
+#sync-dot{width:8px;height:8px;border-radius:50%;background:#6ee7a0;display:inline-block}
+#sync-dot.loading{background:#fcd34d;animation:pulse 1s infinite}
+#sync-dot.error{background:#f87171}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;overflow-x:auto}
+.nav-btn{padding:13px 18px;font-size:13px;font-family:'Noto Sans JP',sans-serif;border:none;background:none;cursor:pointer;color:var(--text-muted);border-bottom:2px solid transparent;white-space:nowrap;font-weight:500;letter-spacing:.03em}
+.nav-btn.active{color:var(--green);border-bottom-color:var(--gold)}
+.nav-btn:hover:not(.active){color:var(--green)}
+main{padding:24px;max-width:900px;margin:0 auto}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface)}
+.card-title{font-size:14px;font-weight:700;color:var(--green-dark);letter-spacing:.04em}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);background:var(--bg);border-bottom:1px solid var(--border);letter-spacing:.06em;text-transform:uppercase}
+td{padding:11px 14px;border-bottom:1px solid #EDE9E0}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#F8F6F2}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.bg-win{background:#dcfce7;color:#166534}.bg-place{background:#dbeafe;color:#1e40af}
+.bg-show{background:#fef9c3;color:#854d0e}.bg-none{background:#f1f5f1;color:var(--text-muted)}
+.bg-g1{background:#fef3c7;color:#92400e}.bg-g2{background:#ede9fe;color:#5b21b6}
+.bg-g3{background:#e0e7ff;color:#3730a3}.bg-op{background:#dcfce7;color:#14532d}
+.bg-class{background:#f1f5f9;color:#334155}.bg-maiden{background:#fce7f3;color:#9d174d}.bg-new{background:#ffedd5;color:#9a3412}
+.bg-pending{background:#f1f5f9;color:#334155}
+.pts-positive{color:var(--green);font-weight:700;font-family:'DM Mono',monospace}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:12px;font-weight:600;color:var(--text-muted);letter-spacing:.04em;text-transform:uppercase}
+.form-group input,.form-group select{padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Noto Sans JP',sans-serif;background:var(--surface);color:var(--text);outline:none}
+.form-group input:focus,.form-group select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,112,74,0.1)}
+.btn{padding:9px 20px;border-radius:50px;font-size:13px;font-family:'Noto Sans JP',sans-serif;cursor:pointer;font-weight:600;border:none;letter-spacing:.03em}
+.btn-primary{background:var(--green);color:#fff}.btn-primary:hover{background:var(--green-dark)}
+.btn-secondary{background:var(--surface);color:var(--green-dark);border:1.5px solid var(--green)}.btn-secondary:hover{background:var(--green-light)}
+.btn-sm{padding:5px 14px;font-size:12px;border-radius:50px;cursor:pointer;font-weight:600;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-family:'Noto Sans JP',sans-serif}
+.btn-sm:hover{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.btn-sm-danger{padding:5px 14px;font-size:12px;border-radius:50px;cursor:pointer;font-weight:600;border:1.5px solid #fca5a5;background:#fff;color:#dc2626;font-family:'Noto Sans JP',sans-serif}
+.btn-sm-danger:hover{background:#fef2f2}
+.search-input{padding:7px 14px;border:1.5px solid var(--border);border-radius:50px;font-size:13px;font-family:'Noto Sans JP',sans-serif;background:var(--surface);color:var(--text);width:200px;outline:none}
+.search-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,112,74,0.1)}
+.pt-table{width:100%;border-collapse:collapse;font-size:13px}
+.pt-table th{padding:8px 10px;background:#f7f9f7;border-bottom:1px solid var(--border);font-size:11px;text-align:center}
+.pt-table th:first-child{text-align:left}
+.pt-table td{padding:7px 10px;border-bottom:1px solid #f0f4f0;text-align:center}
+.pt-table td:first-child{text-align:left}
+.pt-table tr:last-child td{border-bottom:none}
+.pt-input{width:56px;padding:5px 6px;border:1px solid var(--border);border-radius:5px;font-size:13px;text-align:center;background:var(--surface);color:var(--text);font-family:'DM Mono',monospace}
+.pt-input:focus{outline:none;border-color:var(--green)}
+.loading-overlay{position:fixed;inset:0;background:rgba(247,249,247,.9);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:100;font-size:14px;color:var(--text-muted)}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;transform:translateY(8px);transition:all .3s;z-index:200;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}.toast.error{background:#dc2626}
+.clickable-row{cursor:pointer}
+.clickable-row:hover td{background:#f0f8f3 !important}
+.back-btn{display:flex;align-items:center;gap:4px;background:none;border:1.5px solid var(--border);border-radius:50px;padding:7px 16px;font-size:13px;font-family:'Noto Sans JP',sans-serif;cursor:pointer;color:var(--text-muted);font-weight:600}
+.back-btn:hover{background:var(--green-light);color:var(--green);border-color:var(--green)}
+.detail-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.detail-metric{background:var(--green-dark);border-radius:var(--radius);padding:14px 16px}
+.detail-metric-label{font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:4px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.detail-metric-value{font-size:24px;font-weight:700;color:#fff;font-family:'DM Mono',monospace}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:300;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius);padding:24px;width:420px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.confirm-box{background:var(--surface);border-radius:var(--radius);padding:24px;width:340px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
+.confirm-msg{font-size:14px;color:var(--text);line-height:1.7;margin-bottom:20px}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:16px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
 </style>
 </head>
 <body>
 
+<div id="loading-overlay" class="loading-overlay"><div class="spinner"></div><span>データを読み込み中…</span></div>
+<div id="toast" class="toast"></div>
+
+<!-- カスタム確認ダイアログ -->
+<div id="confirm-modal" class="modal-bg">
+  <div class="confirm-box">
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn btn-secondary" onclick="confirmResolve(false)">キャンセル</button>
+      <button class="btn" style="background:#dc2626;color:#fff" onclick="confirmResolve(true)">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 着順入力モーダル -->
+<div id="result-modal" class="modal-bg">
+  <div class="modal">
+    <div class="modal-title">レース結果を入力</div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px" id="modal-entry-info"></div>
+    <div class="form-grid" style="margin-bottom:12px">
+      <div class="form-group">
+        <label>着順</label>
+        <select id="modal-place" onchange="updateModalPt()">
+          <option value="1">1着</option><option value="2">2着</option><option value="3">3着</option><option value="4">4着</option><option value="5">5着</option><option value="6">6着以下</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>加算ポイント（自動入力・上書き可）</label>
+        <input type="number" id="modal-pt" min="0">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="submitResult()">結果を確定する</button>
+    </div>
+  </div>
+</div>
+
 <header>
-  <div class="logo">
-    <div class="logo-icon">P</div>
-    <span class="logo-text">POG Draft</span>
-  </div>
-  <div class="header-right">
-    <span class="save-badge" id="save-badge">✓ 保存しました</span>
-  </div>
+  <h1>☘️ POG管理ツール</h1>
+  <div id="sync-status"><span id="sync-dot"></span><span id="sync-text">同期中…</span></div>
 </header>
 
-<!-- STEP 1 -->
-<div id="setup">
-  <div class="resume-box" id="resume-box">
-    <p>前回の途中データが見つかりました。<br><strong id="resume-info"></strong></p>
-    <div class="resume-btns">
-      <button class="btn-primary" onclick="resumeSession()">続きから再開する</button>
-      <button class="btn-ghost" onclick="clearSaved()">新しくはじめる</button>
+<nav>
+  <button class="nav-btn active" onclick="showPanel('home')">ホーム</button>
+  <button class="nav-btn" onclick="showPanel('chart')">グラフ</button>
+  <button class="nav-btn" onclick="showPanel('horses')">指名馬</button>
+  <button class="nav-btn" onclick="showPanel('results')">レース結果</button>
+  <button class="nav-btn" onclick="showPanel('entries')">出走予定</button>
+  <button class="nav-btn" onclick="showPanel('points')">ポイント設定</button>
+  <button class="nav-btn" onclick="showPanel('register')">登録</button>
+</nav>
+
+<main>
+
+<!-- ホーム -->
+<div id="panel-home" class="panel active">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">ポイントランキング</span>
+      <button class="btn btn-secondary" onclick="loadData()" style="font-size:12px;padding:6px 14px">更新</button>
     </div>
+    <table>
+      <thead><tr><th style="width:60px">順位</th><th style="width:120px">参加者</th><th style="text-align:right">ポイント</th><th style="width:120px"></th></tr></thead>
+      <tbody id="ranking-body"></tbody>
+    </table>
   </div>
-  <div class="card-box">
-    <div class="section-label">基本設定</div>
-    <div class="row2">
-      <div class="field"><label>参加者数上限</label><input type="number" id="max-p" value="15" min="2" max="15"></div>
-      <div class="field"><label>指名馬数（1人あたり）</label><input type="number" id="max-h" value="15" min="1" max="15"></div>
-    </div>
-    <div class="section-label">参加者</div>
-    <div class="add-row">
-      <input type="text" id="p-input" placeholder="参加者名を入力..." maxlength="20">
-      <button class="btn-secondary" id="add-p-btn">追加</button>
-    </div>
-    <div class="tags" id="tags"></div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">直近の出走予定</span></div>
+    <table>
+      <thead><tr><th>日付</th><th>レース名</th><th>馬名</th><th>参加者</th><th>状態</th></tr></thead>
+      <tbody id="home-entries-body"></tbody>
+    </table>
   </div>
-  <button class="btn-primary" id="setup-start-btn" disabled>馬名登録へ →</button>
 </div>
 
-<!-- STEP 2 -->
-<div id="register">
-  <div class="toolbar">
-    <span class="reg-progress">入力済み：<b id="reg-count">0</b> / <span id="reg-total">0</span></span>
-    <div class="toolbar-sep"></div>
-    <button class="btn-ghost" onclick="backToSetup()">← 参加者設定</button>
-    <button class="btn-success" id="draft-start-btn" disabled>ドラフト開始 →</button>
+<!-- 個人詳細 -->
+<!-- グラフ -->
+<div id="panel-chart" class="panel">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">週別順位変遷グラフ</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <select id="chart-mode" onchange="renderChart()" style="padding:5px 10px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text)">
+          <option value="rank">順位</option>
+          <option value="points">累計ポイント</option>
+        </select>
+      </div>
+    </div>
+    <div style="padding:16px;overflow-x:auto">
+      <canvas id="rank-chart" style="width:100%"></canvas>
+    </div>
+    <div id="chart-legend" style="padding:0 16px 16px;display:flex;flex-wrap:wrap;gap:12px"></div>
   </div>
-  <div class="table-wrap"><table id="reg-table"></table></div>
 </div>
 
-<!-- STEP 3 -->
-<div id="draft">
-  <div class="toolbar">
-    <div class="stats" id="stats"></div>
-    <div class="toolbar-sep"></div>
-    <button class="btn-secondary" id="save-img-btn" onclick="saveImage()">📷 画像で保存</button>
-    <button class="btn-ghost" onclick="backToRegister()">← 馬名登録</button>
-    <button class="btn-danger" onclick="resetAll()">やり直す</button>
+<div id="panel-player-detail" class="panel">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+    <button class="back-btn" onclick="showPanel('home')">← 戻る</button>
+    <span id="detail-player-name" style="font-size:20px;font-weight:700"></span>
   </div>
-  <div class="legend">
-    <span>🎯 当選（他に指名なし）</span>
-    <span>😇 ハズレ（すでに指名済み）</span>
-    <span>🂠 クリックでめくる</span>
+  <div class="detail-metrics">
+    <div class="detail-metric"><div class="detail-metric-label">合計ポイント</div><div class="detail-metric-value" id="detail-total-pt">—</div></div>
+    <div class="detail-metric"><div class="detail-metric-label">指名頭数</div><div class="detail-metric-value" id="detail-horse-count">—</div></div>
+    <div class="detail-metric"><div class="detail-metric-label">勝利数</div><div class="detail-metric-value" id="detail-wins">—</div></div>
   </div>
-  <div class="table-wrap"><table id="draft-table"></table></div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">指名馬とポイント内訳</span></div>
+    <table>
+      <thead><tr><th>馬名</th><th>性別</th><th>厩舎</th><th style="text-align:right">獲得pt</th><th>成績</th></tr></thead>
+      <tbody id="detail-horses-body"></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">レース履歴</span></div>
+    <table>
+      <thead><tr><th>日付</th><th>レース名</th><th>グレード</th><th>馬名</th><th>着順</th><th style="text-align:right">加算pt</th></tr></thead>
+      <tbody id="detail-results-body"></tbody>
+    </table>
+  </div>
 </div>
 
+<!-- 指名馬 -->
+<div id="panel-horses" class="panel">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">指名馬一覧</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="horse-player-filter" onchange="renderHorses()" style="padding:7px 12px;font-size:13px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);outline:none">
+          <option value="">すべて</option>
+        </select>
+        <input class="search-input" type="text" placeholder="馬名で検索" id="horse-search" oninput="renderHorses()">
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="cursor:pointer;user-select:none" onclick="sortHorses('name')">馬名 <span id="sort-name">↕</span></th>
+        <th style="cursor:pointer;user-select:none" onclick="sortHorses('player')">参加者 <span id="sort-player">↕</span></th>
+        <th>性別</th><th>厩舎</th><th style="text-align:right;cursor:pointer;user-select:none" onclick="sortHorses('points')">ポイント <span id="sort-points">↕</span></th><th>成績</th><th>リンク</th><th></th>
+      </tr></thead>
+      <tbody id="horses-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- レース結果 -->
+<div id="panel-results" class="panel">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">レース結果一覧</span>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="results-week-filter" onchange="renderResults()" style="padding:7px 12px;font-size:13px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);outline:none">
+          <option value="">すべての週</option>
+        </select>
+        <button class="btn-sm" onclick="toggleResultsSort()" id="results-sort-btn">日付 ↓ 新しい順</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>日付</th><th>レース名</th><th>グレード</th><th>馬名</th><th>着順</th><th style="text-align:right">加算pt</th><th></th></tr></thead>
+      <tbody id="results-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 出走予定 -->
+<div id="panel-entries" class="panel">
+  <div class="card">
+    <div class="card-header"><span class="card-title">出走予定一覧</span></div>
+    <table>
+      <thead><tr><th>日付</th><th>レース名</th><th>グレード</th><th>馬名</th><th>参加者</th><th>状態</th><th></th></tr></thead>
+      <tbody id="entries-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ポイント設定 -->
+<div id="panel-points" class="panel">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">グレード別ポイント設定</span>
+      <button class="btn btn-primary" onclick="savePoints()">保存してスプレッドシートに反映</button>
+    </div>
+    <div style="padding:16px">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">各グレード・着順ごとの加算ポイントを設定できます。変更後は必ず「保存」を押してください。</p>
+      <table class="pt-table">
+        <thead><tr><th>グレード</th><th>1着</th><th>2着</th><th>3着</th><th>4着</th><th>5着</th><th>6着以下</th></tr></thead>
+        <tbody id="points-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 登録 -->
+<div id="panel-register" class="panel">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="card">
+      <div class="card-header"><span class="card-title">参加者登録</span></div>
+      <div style="padding:16px">
+        <div class="form-group" style="margin-bottom:12px"><label>参加者名</label><input type="text" id="new-player" placeholder="例：田中"></div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label>アイコン画像 <span style="font-weight:400;color:var(--text-muted)">（任意）</span></label>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--text);background:var(--surface)">
+              📁 画像を選択
+              <input type="file" id="new-player-icon-file" accept="image/*" style="display:none" onchange="previewPlayerIcon(this)">
+            </label>
+            <img id="new-player-icon-preview" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);display:none">
+            <span id="new-player-icon-name" style="font-size:12px;color:var(--text-muted)"></span>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addPlayer()">登録</button>
+        <div id="player-list" style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">馬登録</span></div>
+      <div style="padding:16px">
+        <div class="form-grid" style="margin-bottom:12px">
+          <div class="form-group"><label>馬名</label><input type="text" id="new-horse-name" placeholder="例：サトノダイヤモンド"></div>
+          <div class="form-group"><label>参加者</label><select id="new-horse-player"><option value="">選択してください</option></select></div>
+        </div>
+        <div class="form-grid" style="margin-bottom:14px">
+          <div class="form-group"><label>性別</label><select id="new-horse-sex"><option value="牡">牡</option><option value="牝">牝</option><option value="騸">騸</option></select></div>
+          <div class="form-group"><label>厩舎</label><input type="text" id="new-horse-trainer" placeholder="例：国枝栄"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label>リンク <span style="font-weight:400;color:var(--text-muted)">（任意・netkeibaなど）</span></label>
+          <input type="text" id="new-horse-url" placeholder="例：https://db.netkeiba.com/horse/...">
+        </div>
+        <button class="btn btn-primary" onclick="addHorse()">登録</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 出走予定登録 -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><span class="card-title">出走予定登録</span></div>
+    <div style="padding:16px">
+      <div class="form-grid" style="margin-bottom:12px">
+        <div class="form-group"><label>日付</label><input type="date" id="new-entry-date"></div>
+        <div class="form-group"><label>競馬場</label>
+          <select id="new-entry-venue">
+            <option value="">選択してください</option>
+            <option value="札幌">札幌</option>
+            <option value="函館">函館</option>
+            <option value="福島">福島</option>
+            <option value="新潟">新潟</option>
+            <option value="東京">東京</option>
+            <option value="中山">中山</option>
+            <option value="中京">中京</option>
+            <option value="京都">京都</option>
+            <option value="阪神">阪神</option>
+            <option value="小倉">小倉</option>
+            <option value="地方">地方</option>
+            <option value="海外">海外</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid" style="margin-bottom:12px">
+        <div class="form-group"><label>レース番号</label>
+          <select id="new-entry-raceno">
+            <option value="">選択してください</option>
+            <option value="1R">1R</option><option value="2R">2R</option><option value="3R">3R</option>
+            <option value="4R">4R</option><option value="5R">5R</option><option value="6R">6R</option>
+            <option value="7R">7R</option><option value="8R">8R</option><option value="9R">9R</option>
+            <option value="10R">10R</option><option value="11R">11R</option><option value="12R">12R</option>
+          </select>
+        </div>
+        <div class="form-group"><label>レース名 <span style="font-weight:400;color:var(--text-muted)">（任意）</span></label><input type="text" id="new-entry-name" placeholder="例：皐月賞"></div>
+      </div>
+      <div class="form-grid" style="margin-bottom:14px">
+        <div class="form-group"><label>グレード</label>
+          <select id="new-entry-grade">
+            <option value="newface">新馬</option><option value="maiden">未勝利</option>
+            <option value="1c">1勝クラス</option><option value="op">オープン・地方重賞</option>
+            <option value="g3">G3</option><option value="g2">G2</option><option value="g1">G1</option>
+            <option value="derby">ダービー</option>
+          </select>
+        </div>
+        <div class="form-group"><label>参加者</label><select id="new-entry-player" onchange="updateEntryHorses()"><option value="">選択してください</option></select></div>
+      </div>
+      <div class="form-grid" style="margin-bottom:14px">
+        <div class="form-group"><label>馬名</label><select id="new-entry-horse"><option value="">先に参加者を選択してください</option></select></div>
+      </div>
+      <button class="btn btn-primary" onclick="addEntry()">出走予定を登録</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-const STORAGE_KEY = 'pog_draft_v1';
-let participants = [], maxH = 15, draftData = {}, revealedHorses = {}, revealedSet = {}, currentStep = 'setup';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzXzDWZcatCKlKBHCq1BWNSywrAYtVZpPz53v9BHutBL6qLrD1xjP-8vRbVLyeCC1_X/exec';
 
-function saveState() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ participants, maxH, draftData, revealedHorses, revealedSet, currentStep }));
-    const b = document.getElementById('save-badge');
-    b.classList.add('show');
-    setTimeout(() => b.classList.remove('show'), 1800);
-  } catch(e) {}
-}
-function loadState() { try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
-function clearSaved() { try { localStorage.removeItem(STORAGE_KEY); } catch(e) {} document.getElementById('resume-box').style.display = 'none'; }
+const GRADES = [
+  {key:'newface',label:'新馬',cls:'bg-new'},{key:'maiden',label:'未勝利',cls:'bg-maiden'},
+  {key:'1c',label:'1勝クラス',cls:'bg-class'},{key:'op',label:'オープン・地方重賞',cls:'bg-op'},
+  {key:'g3',label:'G3',cls:'bg-g3'},{key:'g2',label:'G2',cls:'bg-g2'},{key:'g1',label:'G1',cls:'bg-g1'},{key:'derby',label:'ダービー',cls:'bg-g1'},
+];
 
-window.addEventListener('load', () => {
-  const s = loadState();
-  if (s && s.participants && s.participants.length > 0) {
-    const names = { setup: '参加者設定', register: '馬名登録中', draft: 'ドラフト発表中' };
-    document.getElementById('resume-info').textContent = `参加者 ${s.participants.length}人 / ${s.maxH}頭 / ${names[s.currentStep] || ''}`;
-    document.getElementById('resume-box').style.display = 'block';
-  }
-});
+const DEFAULT_PT = {
+  newface:{1:6,2:4,3:3,4:1,5:0},maiden:{1:6,2:4,3:3,4:1,5:0},
+  '1c':{1:8,2:5,3:3,4:1,5:0},
+  op:{1:15,2:9,3:6,4:3,5:0},g3:{1:20,2:12,3:8,4:4,5:1},g2:{1:30,2:18,3:12,4:6,5:2},g1:{1:50,2:30,3:20,4:10,5:3},derby:{1:100,2:50,3:30,4:15,5:5}
+};
 
-function resumeSession() {
-  const s = loadState(); if (!s) return;
-  participants = s.participants; maxH = s.maxH; draftData = s.draftData;
-  revealedHorses = s.revealedHorses || {}; revealedSet = s.revealedSet || {}; currentStep = s.currentStep;
-  document.getElementById('max-p').value = participants.length;
-  document.getElementById('max-h').value = maxH;
-  renderTags();
-  if (currentStep === 'draft') showDraft(); else showRegister();
+let state = {players:[],horses:[],results:[],entries:[],ptTable:JSON.parse(JSON.stringify(DEFAULT_PT))};
+let pendingEntryId = null;
+let horseSort = {key:'name', asc:true};
+
+function setSyncStatus(s){
+  const dot=document.getElementById('sync-dot'),text=document.getElementById('sync-text');
+  dot.className=s==='loading'?'loading':s==='error'?'error':'';
+  dot.style.background=s==='ok'?'#6ee7a0':s==='loading'?'#fcd34d':'#f87171';
+  text.textContent=s==='ok'?'同期済み':s==='loading'?'同期中…':'同期エラー';
 }
 
-// STEP1
-const pInput = document.getElementById('p-input');
-const tagsEl = document.getElementById('tags');
-const setupStartBtn = document.getElementById('setup-start-btn');
+function showToast(msg,isError=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(isError?' error':'');
+  setTimeout(()=>t.className='toast',3000);
+}
 
-function renderTags() {
-  tagsEl.innerHTML = '';
-  participants.forEach((p, i) => {
-    const t = document.createElement('div'); t.className = 'tag';
-    t.innerHTML = `<span>${p}</span><button class="tag-x" onclick="removeP(${i})">×</button>`;
-    tagsEl.appendChild(t);
+async function gasRequest(action,data=null){
+  const url=new URL(GAS_URL);
+  url.searchParams.set('action',action);
+  if(data)url.searchParams.set('data',JSON.stringify(data));
+  const res=await fetch(url.toString(),{redirect:'follow'});
+  if(!res.ok)throw new Error('Network error');
+  return await res.json();
+}
+
+async function loadData(){
+  setSyncStatus('loading');
+  try{
+    const r=await gasRequest('read');
+    if(!r.ok)throw new Error(r.error);
+    state.players=r.data.players||[];
+    state.horses=r.data.horses||[];
+    state.results=r.data.results||[];
+    state.entries=r.data.entries||[];
+    if(r.data.ptTable&&Object.keys(r.data.ptTable).length>0)state.ptTable=r.data.ptTable;
+    recalc();renderAll();setSyncStatus('ok');
+  }catch(e){setSyncStatus('error');showToast('データの読み込みに失敗しました',true);}
+  finally{document.getElementById('loading-overlay').style.display='none';}
+}
+
+async function saveData(){
+  setSyncStatus('loading');
+  try{
+    // playersは画像データが大きいので別途送信、writeAllではplayersをスキップ
+    const r1=await gasRequest('writePlayers',{players:state.players});
+    if(!r1.ok)throw new Error(r1.error);
+    const stateNoPlayers={...state,players:[]};
+    const r2=await gasRequest('write',stateNoPlayers);
+    if(!r2.ok)throw new Error(r2.error);
+    setSyncStatus('ok');showToast('スプレッドシートに保存しました');
+  }catch(e){setSyncStatus('error');showToast('保存に失敗しました',true);}
+}
+
+function recalc(){
+  state.horses.forEach(h=>h.points=0);
+  state.results.forEach(r=>{
+    const h=state.horses.find(h=>h.name===r.horse);
+    if(h)h.points+=Number(r.points)||0;
   });
-  setupStartBtn.disabled = participants.length < 2;
-}
-function removeP(i) { participants.splice(i, 1); renderTags(); }
-
-document.getElementById('add-p-btn').addEventListener('click', () => {
-  const v = pInput.value.trim();
-  const maxP = parseInt(document.getElementById('max-p').value) || 15;
-  if (!v) return;
-  if (participants.length >= maxP) { alert(`参加者は${maxP}人までです`); return; }
-  if (participants.includes(v)) { alert('同じ名前の参加者が既にいます'); return; }
-  participants.push(v); pInput.value = ''; renderTags();
-});
-pInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('add-p-btn').click(); });
-
-setupStartBtn.addEventListener('click', () => {
-  maxH = parseInt(document.getElementById('max-h').value) || 15;
-  draftData = {};
-  participants.forEach(p => { draftData[p] = Array(maxH).fill(''); });
-  showRegister();
-});
-
-function backToSetup() {
-  currentStep = 'setup'; saveState();
-  document.getElementById('register').style.display = 'none';
-  document.getElementById('setup').style.display = 'block';
 }
 
-// STEP2
-function showRegister() {
-  currentStep = 'register';
-  document.getElementById('setup').style.display = 'none';
-  document.getElementById('draft').style.display = 'none';
-  document.getElementById('register').style.display = 'block';
-  buildRegTable(); updateRegProgress(); saveState();
+function formatDate(d){
+  if(!d)return'';
+  const s=String(d).slice(0,10);
+  return s.match(/^\d{4}-\d{2}-\d{2}$/)?s:'';
+}
+function getGrade(key){return GRADES.find(g=>g.key===key)||{label:key,cls:'bg-none'};}
+function getPt(grade,place){const t=state.ptTable[grade];return t?(t[place]||0):0;}
+function playerPoints(p){return state.horses.filter(h=>h.player===p).reduce((s,h)=>s+(h.points||0),0);}
+function playerWins(p){return state.results.filter(r=>r.place==1&&state.horses.some(h=>h.name===r.horse&&h.player===p)).length;}
+function playerCount(p){return state.horses.filter(h=>h.player===p).length;}
+
+function horseBadge(name){
+  const rs=state.results.filter(r=>r.horse===name);
+  const best=rs.length?Math.min(...rs.map(r=>Number(r.place))):null;
+  return best===1?'<span class="badge bg-win">勝利あり</span>':best===2?'<span class="badge bg-place">2着あり</span>':best===3?'<span class="badge bg-show">3着あり</span>':'<span class="badge bg-none">未勝利</span>';
+}
+function placeBadge(pl){
+  return pl===1?'<span class="badge bg-win">1着</span>':pl===2?'<span class="badge bg-place">2着</span>':pl===3?'<span class="badge bg-show">3着</span>':pl===4?'4着':pl===5?'5着':'<span class="badge bg-none">6着以下</span>';
+}
+function isFinished(entry){
+  return state.results.some(r=>r.horse===entry.horse&&r.race===entry.race&&r.date===entry.date);
 }
 
-function buildRegTable() {
-  const table = document.getElementById('reg-table'); table.innerHTML = '';
-  const thead = document.createElement('thead');
-  const hr = document.createElement('tr');
-  const th0 = document.createElement('th'); th0.textContent = '順位'; hr.appendChild(th0);
-  participants.forEach(p => { const th = document.createElement('th'); th.textContent = p; hr.appendChild(th); });
-  thead.appendChild(hr); table.appendChild(thead);
-  const tbody = document.createElement('tbody');
-  for (let i = 0; i < maxH; i++) {
-    const tr = document.createElement('tr');
-    const td0 = document.createElement('td'); td0.textContent = `${i+1}位`; tr.appendChild(td0);
-    participants.forEach(p => {
-      const td = document.createElement('td');
-      const inp = document.createElement('input');
-      inp.type = 'text'; inp.className = 'reg-input'; inp.maxLength = 30; inp.placeholder = '馬名';
-      inp.value = draftData[p][i] || '';
-      if (inp.value) inp.classList.add('filled');
-      inp.addEventListener('input', () => {
-        draftData[p][i] = inp.value.trim();
-        inp.classList.toggle('filled', !!inp.value.trim());
-        updateRegProgress(); saveState();
-      });
-      inp.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-          const inputs = Array.from(document.querySelectorAll('.reg-input'));
-          const idx = inputs.indexOf(inp);
-          if (idx + 1 < inputs.length) inputs[idx + 1].focus();
+function playerIcon(p,size=32){
+  if(p.icon){
+    return`<img src="${p.icon}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">`;
+  }
+  const colors=['#1a6b3c','#185FA5','#854F0B','#5b21b6','#9d174d','#3730a3','#92400e','#166534'];
+  const color=colors[p.name.charCodeAt(0)%colors.length];
+  return`<span style="width:${size}px;height:${size}px;border-radius:50%;background:${color};color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:${Math.floor(size*0.4)}px;font-weight:700;flex-shrink:0">${p.name.slice(0,1)}</span>`;
+}
+
+function renderRanking(){
+  const ranked=[...state.players]
+    .map(p=>({...p,points:playerPoints(p.name),wins:playerWins(p.name),count:playerCount(p.name)}))
+    .sort((a,b)=>b.points-a.points);
+  document.getElementById('ranking-body').innerHTML=ranked.map((p,i)=>{
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    const num=medal?`<span>${medal}</span>`:`<span style="font-family:'DM Mono',monospace;color:var(--text-muted)">${i+1}</span>`;
+    const ptColor=i===0?'#92400e':i===1?'#475569':i===2?'#7c3d1a':'var(--green)';
+    return `<tr class="clickable-row" onclick="showPlayerDetail('${p.name.replace(/'/g,"\\'")}')">
+      <td>${num}</td>
+      <td><div style="display:flex;align-items:center;gap:8px;max-width:120px;overflow:hidden">${playerIcon(p,28)}<span style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</span></div></td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;font-weight:700;font-size:15px;color:${ptColor}">${p.points}pt</td>
+      <td style="text-align:right;font-size:12px;color:var(--green)">詳細 →</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderHomeEntries(){
+  const today=new Date().toISOString().slice(0,10);
+  const upcoming=state.entries
+    .filter(e=>e.date>=today&&!isFinished(e))
+    .sort((a,b)=>a.date.localeCompare(b.date))
+    .slice(0,10);
+  const el=document.getElementById('home-entries-body');
+  if(!upcoming.length){
+    el.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">出走予定なし</td></tr>';
+    return;
+  }
+  el.innerHTML=upcoming.map(e=>{
+    const g=getGrade(e.grade);
+    const horse=state.horses.find(h=>h.name===e.horse);
+    const player=horse?state.players.find(p=>p.name===horse.player):null;
+    const playerCell=player
+      ?`<div style="display:flex;align-items:center;gap:6px">${playerIcon(player,20)}<span>${player.name}</span></div>`
+      :'—';
+    return `<tr>
+      <td style="color:var(--text-muted);font-size:12px;font-family:'DM Mono',monospace">${formatDate(e.date)}</td>
+      <td style="font-weight:500">${e.race}<br><span class="badge ${g.cls}" style="margin-top:3px">${g.label}</span></td>
+      <td style="font-weight:700">${e.horse}</td>
+      <td>${playerCell}</td>
+      <td><span class="badge bg-pending">出走予定</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderEntries(){
+  const sorted=[...state.entries].map((e,i)=>({...e,_idx:i})).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  const el=document.getElementById('entries-body');
+  if(!sorted.length){
+    el.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px">出走予定なし</td></tr>';
+    return;
+  }
+  el.innerHTML=sorted.map((e)=>{
+    const g=getGrade(e.grade);
+    const horse=state.horses.find(h=>h.name===e.horse);
+    const player=horse?horse.player:'—';
+    const finished=isFinished(e);
+    const statusBadge=finished
+      ?'<span class="badge bg-win">結果済</span>'
+      :'<span class="badge bg-pending">出走予定</span>';
+    const actionBtn=finished
+      ?''
+      :`<button class="btn-sm" onclick="openModal(${e._idx})">結果入力</button>
+        <button class="btn-sm-danger" onclick="deleteEntry(${e._idx})" style="margin-left:4px">削除</button>`;
+    return `<tr>
+      <td style="color:var(--text-muted);font-size:12px;font-family:'DM Mono',monospace">${formatDate(e.date)}</td>
+      <td style="font-weight:500">${e.race}</td>
+      <td><span class="badge ${g.cls}">${g.label}</span></td>
+      <td style="font-weight:700">${e.horse}</td>
+      <td style="color:var(--text-muted)">${player}</td>
+      <td>${statusBadge}</td>
+      <td>${actionBtn}</td>
+    </tr>`;
+  }).join('');
+}
+
+function openModal(entryIdx){
+  pendingEntryId=entryIdx;
+  const e=state.entries[entryIdx];
+  const g=getGrade(e.grade);
+  document.getElementById('modal-entry-info').textContent=`${formatDate(e.date)} ${e.race}（${g.label}）— ${e.horse}`;
+  document.getElementById('modal-place').value='1';
+  updateModalPt();
+  document.getElementById('result-modal').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('result-modal').classList.remove('open');
+  pendingEntryId=null;
+}
+function updateModalPt(){
+  const e=state.entries[pendingEntryId];
+  if(!e)return;
+  const place=parseInt(document.getElementById('modal-place').value);
+  document.getElementById('modal-pt').value=getPt(e.grade,place);
+}
+async function submitResult(){
+  const e=state.entries[pendingEntryId];
+  if(!e)return;
+  const place=parseInt(document.getElementById('modal-place').value);
+  const ptVal=document.getElementById('modal-pt').value;
+  const points=ptVal!==''?Math.max(0,parseInt(ptVal)||0):getPt(e.grade,place);
+  state.results.push({date:e.date,race:e.race,grade:e.grade,horse:e.horse,place,points});
+  recalc();closeModal();renderAll();await saveData();
+}
+
+async function deleteEntry(i){
+  if(!await showConfirm('この出走予定を削除しますか？'))return;
+  state.entries.splice(i,1);
+  renderEntries();renderHomeEntries();await saveData();
+}
+
+function showPlayerDetail(playerName){
+  const player=state.players.find(p=>p.name===playerName)||{name:playerName,icon:''};
+  const horses=state.horses.filter(h=>h.player===playerName).sort((a,b)=>(b.points||0)-(a.points||0));
+  const results=state.results.filter(r=>horses.some(h=>h.name===r.horse)).sort((a,b)=>b.date.localeCompare(a.date));
+  const totalPt=horses.reduce((s,h)=>s+(h.points||0),0);
+  const wins=results.filter(r=>r.place==1).length;
+  document.getElementById('detail-player-name').innerHTML=`<div style="display:flex;align-items:center;gap:10px">${playerIcon(player,40)}<span>${playerName}</span></div>`;
+  document.getElementById('detail-total-pt').textContent=totalPt+'pt';
+  document.getElementById('detail-horse-count').textContent=horses.length+'頭';
+  document.getElementById('detail-wins').textContent=wins+'勝';
+  document.getElementById('detail-horses-body').innerHTML=horses.length
+    ?horses.map(h=>`<tr>
+        <td style="font-weight:700">${h.name}</td>
+        <td style="color:var(--text-muted)">${h.sex}</td>
+        <td style="color:var(--text-muted)">${h.trainer||'—'}</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-weight:700;color:var(--green)">${h.points||0}pt</td>
+        <td>${horseBadge(h.name)}</td>
+      </tr>`).join('')
+    :'<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">指名馬なし</td></tr>';
+  document.getElementById('detail-results-body').innerHTML=results.length
+    ?results.map(r=>{const g=getGrade(r.grade);return`<tr>
+        <td style="color:var(--text-muted);font-size:12px;font-family:'DM Mono',monospace">${formatDate(r.date)}</td>
+        <td style="font-weight:500">${r.race}</td>
+        <td><span class="badge ${g.cls}">${g.label}</span></td>
+        <td style="font-weight:700">${r.horse}</td>
+        <td>${placeBadge(Number(r.place))}</td>
+        <td style="text-align:right" class="pts-positive">+${r.points}</td>
+      </tr>`;}).join('')
+    :'<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">レース結果なし</td></tr>';
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-player-detail').classList.add('active');
+}
+
+function sortHorses(key){
+  if(horseSort.key===key) horseSort.asc=!horseSort.asc;
+  else{horseSort.key=key;horseSort.asc=true;}
+  renderHorses();
+}
+
+function renderHorses(){
+  const q=(document.getElementById('horse-search')||{value:''}).value.toLowerCase();
+  const playerFilter=(document.getElementById('horse-player-filter')||{value:''}).value;
+  let filtered=state.horses.filter(h=>{
+    const matchQ=!q||h.name.toLowerCase().includes(q);
+    const matchP=!playerFilter||h.player===playerFilter;
+    return matchQ&&matchP;
+  });
+  filtered=[...filtered].sort((a,b)=>{
+    let va=a[horseSort.key]||'', vb=b[horseSort.key]||'';
+    if(horseSort.key==='points'){va=Number(va);vb=Number(vb);return horseSort.asc?va-vb:vb-va;}
+    return horseSort.asc?va.localeCompare(vb,'ja'):vb.localeCompare(va,'ja');
+  });
+  ['name','player','points'].forEach(k=>{
+    const el=document.getElementById('sort-'+k);
+    if(el)el.textContent=horseSort.key===k?(horseSort.asc?'▲':'▼'):'↕';
+  });
+  document.getElementById('horses-body').innerHTML=filtered.map(h=>{
+    const safeName=h.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const linkBtn=h.url?`<a href="${h.url}" target="_blank" rel="noopener" style="font-size:12px;color:var(--green);text-decoration:none;border:1px solid var(--border);border-radius:5px;padding:3px 8px;white-space:nowrap">開く →</a>`:'<span style="color:var(--text-muted);font-size:12px">—</span>';
+    return`<tr><td style="font-weight:700">${h.name}</td><td>${h.player}</td><td style="color:var(--text-muted)">${h.sex}</td><td style="color:var(--text-muted)">${h.trainer||'—'}</td><td style="text-align:right;font-family:'DM Mono',monospace;font-weight:700">${h.points||0}pt</td><td>${horseBadge(h.name)}</td><td>${linkBtn}</td><td><button class="btn-sm-danger" onclick="deleteHorseByName('${safeName}')">削除</button></td></tr>`;
+  }).join('');
+}
+
+let resultsSortAsc = false;
+
+function toggleResultsSort(){
+  resultsSortAsc = !resultsSortAsc;
+  const btn = document.getElementById('results-sort-btn');
+  if(btn) btn.textContent = resultsSortAsc ? '日付 ↑ 古い順' : '日付 ↓ 新しい順';
+  renderResults();
+}
+
+function updateWeekFilter(){
+  const el = document.getElementById('results-week-filter');
+  if(!el) return;
+  const current = el.value;
+  const weeks = [...new Set(state.results.map(r => getWeekKey(r.date)))].sort().reverse();
+  el.innerHTML = '<option value="">すべての週</option>' + weeks.map(w => {
+    const d = new Date(w);
+    const label = `${d.getMonth()+1}/${d.getDate()}週`;
+    return `<option value="${w}">${label}</option>`;
+  }).join('');
+  if(weeks.includes(current)) el.value = current;
+}
+
+function renderResults(){
+  updateWeekFilter();
+  const weekFilter = (document.getElementById('results-week-filter')||{value:''}).value;
+  let rows = [...state.results].map((r,i)=>({r,i}));
+  if(weekFilter) rows = rows.filter(({r}) => getWeekKey(r.date) === weekFilter);
+  rows.sort((a,b) => {
+    const da = String(a.r.date).slice(0,10);
+    const db = String(b.r.date).slice(0,10);
+    return resultsSortAsc ? da.localeCompare(db) : db.localeCompare(da);
+  });
+  document.getElementById('results-body').innerHTML = rows.length
+    ? rows.map(({r,i}) => {
+        const g = getGrade(r.grade);
+        return `<tr><td style="color:var(--text-muted);font-size:12px;font-family:'DM Mono',monospace">${formatDate(r.date)}</td><td style="font-weight:500">${r.race}</td><td><span class="badge ${g.cls}">${g.label}</span></td><td style="font-weight:700">${r.horse}</td><td>${placeBadge(Number(r.place))}</td><td style="text-align:right" class="pts-positive">+${r.points}</td><td><button class="btn-sm-danger" onclick="deleteResult(${i})">削除</button></td></tr>`;
+      }).join('')
+    : '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px">該当するレース結果がありません</td></tr>';
+}
+
+function renderPlayerList(){
+  const el=document.getElementById('player-list');
+  if(!el)return;
+  el.innerHTML=state.players.map((p,i)=>
+    `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--green-light);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:13px">
+      ${playerIcon(p,20)}
+      ${p.name}
+      <button onclick="deletePlayer(${i})" style="border:none;background:none;cursor:pointer;color:#dc2626;font-size:14px;line-height:1;padding:0" title="削除">×</button>
+    </span>`
+  ).join('');
+}
+
+let confirmResolve = ()=>{};
+function showConfirm(msg){
+  return new Promise(resolve=>{
+    document.getElementById('confirm-msg').textContent=msg;
+    document.getElementById('confirm-modal').classList.add('open');
+    confirmResolve=result=>{
+      document.getElementById('confirm-modal').classList.remove('open');
+      resolve(result);
+    };
+  });
+}
+
+async function deletePlayer(i){
+  const name=state.players[i].name;
+  if(!await showConfirm(`「${name}」を削除しますか？\n※この参加者の指名馬データは残ります`))return;
+  state.players.splice(i,1);
+  renderPlayerList();updateSelects();renderRanking();await saveData();
+}
+
+async function deleteHorseByName(name){
+  if(!await showConfirm(`「${name}」を削除しますか？`))return;
+  const i=state.horses.findIndex(h=>h.name===name);
+  if(i===-1)return;
+  state.horses.splice(i,1);
+  recalc();renderHorses();renderRanking();updateSelects();await saveData();
+}
+
+async function deleteResult(i){
+  const r=state.results[i];
+  if(!r)return;
+  if(!await showConfirm(`「${formatDate(r.date)} ${r.race} ${r.horse}」の結果を削除しますか？`))return;
+  state.results.splice(i,1);
+  recalc();renderResults();renderRanking();renderHorses();await saveData();
+}
+
+function renderPoints(){
+  document.getElementById('points-body').innerHTML=GRADES.map(g=>{
+    const t=state.ptTable[g.key]||{1:0,2:0,3:0,4:0,5:0};
+    return`<tr><td><span class="badge ${g.cls}">${g.label}</span></td>${[1,2,3,4,5,6].map(p=>`<td><input class="pt-input" type="number" min="0" id="pt-${g.key}-${p}" value="${t[p]||0}"></td>`).join('')}</tr>`;
+  }).join('');
+}
+
+function updateEntryHorses(){
+  const player = (document.getElementById('new-entry-player')||{value:''}).value;
+  const horses = player
+    ? state.horses.filter(h => h.player === player)
+    : [];
+  const el = document.getElementById('new-entry-horse');
+  if(!el) return;
+  el.innerHTML = player
+    ? '<option value="">選択してください</option>' + horses.map(h=>`<option>${h.name}</option>`).join('')
+    : '<option value="">先に参加者を選択してください</option>';
+}
+
+function updateSelects(){
+  const playerOpts='<option value="">選択してください</option>'+state.players.map(p=>`<option>${p.name}</option>`).join('');
+  document.getElementById('new-horse-player').innerHTML=playerOpts;
+  // 出走予定の参加者プルダウン
+  const entryPlayerEl=document.getElementById('new-entry-player');
+  if(entryPlayerEl){
+    const current=entryPlayerEl.value;
+    entryPlayerEl.innerHTML='<option value="">選択してください</option>'+state.players.map(p=>`<option>${p.name}</option>`).join('');
+    entryPlayerEl.value=current;
+  }
+  updateEntryHorses();
+  // 指名馬絞り込みプルダウン
+  const filterEl=document.getElementById('horse-player-filter');
+  if(filterEl){
+    const current=filterEl.value;
+    filterEl.innerHTML='<option value="">すべて</option>'+state.players.map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
+    filterEl.value=current;
+  }
+}
+
+function previewPlayerIcon(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const preview=document.getElementById('new-player-icon-preview');
+    preview.src=e.target.result;
+    preview.style.display='block';
+    document.getElementById('new-player-icon-name').textContent=file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function addPlayer(){
+  const name=document.getElementById('new-player').value.trim();
+  if(!name||state.players.some(p=>p.name===name))return showToast('名前を入力してください（重複不可）',true);
+  const file=document.getElementById('new-player-icon-file').files[0];
+  let icon='';
+  if(file){
+    icon=await new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=e=>{
+        const img=new Image();
+        img.onload=()=>{
+          const canvas=document.createElement('canvas');
+          const size=64;
+          canvas.width=size;canvas.height=size;
+          const ctx=canvas.getContext('2d');
+          const min=Math.min(img.width,img.height);
+          const sx=(img.width-min)/2;
+          const sy=(img.height-min)/2;
+          ctx.drawImage(img,sx,sy,min,min,0,0,size,size);
+          resolve(canvas.toDataURL('image/jpeg',0.5));
+        };
+        img.src=e.target.result;
+      };
+      reader.onerror=reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  state.players.push({name,icon});
+  document.getElementById('new-player').value='';
+  document.getElementById('new-player-icon-file').value='';
+  document.getElementById('new-player-icon-preview').style.display='none';
+  document.getElementById('new-player-icon-name').textContent='';
+  updateSelects();renderRanking();renderPlayerList();await saveData();
+}
+
+async function addHorse(){
+  const name=document.getElementById('new-horse-name').value.trim();
+  const player=document.getElementById('new-horse-player').value;
+  const sex=document.getElementById('new-horse-sex').value;
+  const trainer=document.getElementById('new-horse-trainer').value.trim();
+  const url=document.getElementById('new-horse-url').value.trim();
+  if(!name||!player)return showToast('馬名と参加者を入力してください',true);
+  if(state.horses.some(h=>h.name===name))return showToast('同名の馬が既に登録されています',true);
+  state.horses.push({name,player,sex,trainer,url,points:0});
+  document.getElementById('new-horse-name').value='';
+  document.getElementById('new-horse-trainer').value='';
+  document.getElementById('new-horse-url').value='';
+  updateSelects();renderHorses();await saveData();
+}
+
+async function addEntry(){
+  const date=document.getElementById('new-entry-date').value;
+  const venue=document.getElementById('new-entry-venue').value;
+  const raceno=document.getElementById('new-entry-raceno').value;
+  const name=document.getElementById('new-entry-name').value.trim();
+  const grade=document.getElementById('new-entry-grade').value;
+  const horse=document.getElementById('new-entry-horse').value;
+  if(!date||!horse)return showToast('日付と馬名は必須です',true);
+  const raceParts=[venue,raceno,name].filter(Boolean);
+  const race=raceParts.length?raceParts.join(' '):'（未定）';
+  state.entries.push({date,race,grade,horse});
+  document.getElementById('new-entry-date').value='';
+  document.getElementById('new-entry-venue').value='';
+  document.getElementById('new-entry-raceno').value='';
+  document.getElementById('new-entry-name').value='';
+  document.getElementById('new-entry-player').value='';
+  updateEntryHorses();
+  renderEntries();renderHomeEntries();
+  showToast('出走予定を登録しました');
+  await saveData();
+}
+
+async function savePoints(){
+  GRADES.forEach(g=>{
+    if(!state.ptTable[g.key])state.ptTable[g.key]={};
+    [1,2,3,4,5,6].forEach(p=>{
+      const el=document.getElementById(`pt-${g.key}-${p}`);
+      state.ptTable[g.key][p]=el?Math.max(0,parseInt(el.value)||0):0;
+    });
+  });
+  recalc();renderAll();await saveData();
+}
+
+let chartInstance = null;
+
+function getWeekKey(dateStr) {
+  const d = new Date(String(dateStr).slice(0,10));
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const mon = new Date(d.setDate(diff));
+  return mon.toISOString().slice(0, 10);
+}
+
+function renderChart() {
+  const mode = document.getElementById('chart-mode')?.value || 'rank';
+
+  // canvasを作り直してサイズキャッシュをリセット
+  const container = document.getElementById('rank-chart').parentNode;
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  const oldCanvas = document.getElementById('rank-chart');
+  oldCanvas.remove();
+  const newCanvas = document.createElement('canvas');
+  newCanvas.id = 'rank-chart';
+  newCanvas.style.width = '100%';
+  const playerCount = state.players.length;
+  const maxPt = Math.max(...state.players.map(p => {
+    return state.horses.filter(h=>h.player===p.name).reduce((s,h)=>s+(h.points||0),0);
+  }), 0);
+  const chartHeight = mode === 'rank'
+    ? Math.max(280, playerCount * 52)
+    : Math.min(500, Math.max(340, Math.ceil(maxPt / 100) * 40));
+  newCanvas.style.height = chartHeight + 'px';
+  newCanvas.height = chartHeight;
+  container.insertBefore(newCanvas, container.firstChild);
+
+  const ctx = newCanvas.getContext('2d');
+
+  if (!state.results.length) {
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+    ctx.clearRect(0, 0, newCanvas.width, newCanvas.height);
+    ctx.font = '14px sans-serif';
+    ctx.fillStyle = '#6b7f6b';
+    ctx.textAlign = 'center';
+    ctx.fillText('レース結果を登録するとグラフが表示されます', newCanvas.width / 2, 160);
+    return;
+  }
+
+  const weeks = [...new Set(state.results.map(r => getWeekKey(r.date)))].sort();
+  const allWeeks = [];
+  if (weeks.length) {
+    let cur = new Date(weeks[0]);
+    const last = new Date(weeks[weeks.length - 1]);
+    while (cur <= last) {
+      allWeeks.push(cur.toISOString().slice(0, 10));
+      cur = new Date(cur); cur.setDate(cur.getDate() + 7);
+    }
+  }
+
+  const COLORS = ['#1a6b3c','#185FA5','#854F0B','#5b21b6','#9d174d','#3730a3','#c2410c','#0e7490','#4d7c0f','#7c3aed','#b45309','#0f766e'];
+
+  const datasets = state.players.map((p, pi) => {
+    const ptByWeek = {};
+    state.results
+      .filter(r => state.horses.some(h => h.name === r.horse && h.player === p.name))
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+      .forEach(r => { const w = getWeekKey(r.date); ptByWeek[w] = (ptByWeek[w] || 0) + r.points; });
+    let cum = 0;
+    const cumData = allWeeks.map(w => { cum += ptByWeek[w] || 0; return cum; });
+    return { playerName: p.name, cumData, color: COLORS[pi % COLORS.length] };
+  });
+
+  const chartDatasets = datasets.map(ds => {
+    const data = mode === 'rank'
+      ? allWeeks.map((w, wi) => datasets.filter(d => d.cumData[wi] > ds.cumData[wi]).length + 1)
+      : ds.cumData;
+    return {
+      label: ds.playerName,
+      data,
+      borderColor: ds.color,
+      backgroundColor: ds.color + '22',
+      borderWidth: 2.5,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      tension: 0.3,
+      fill: false,
+    };
+  });
+
+  const labels = allWeeks.map(w => w.slice(5).replace('-', '/') + '週');
+
+  // 最新点にアイコンを描画するプラグイン
+  const iconSize = 28;
+  const iconCache = {};
+  const lastPointIconPlugin = {
+    id: 'lastPointIcon',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      chart.data.datasets.forEach((ds, di) => {
+        const meta = chart.getDatasetMeta(di);
+        if (!meta.data.length) return;
+        const lastPoint = meta.data[meta.data.length - 1];
+        const x = lastPoint.x;
+        const y = lastPoint.y;
+        const player = state.players[di];
+        if (!player) return;
+
+        if (player.icon) {
+          if (!iconCache[player.icon]) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = player.icon;
+            img.onload = () => { iconCache[player.icon] = img; chart.draw(); };
+            iconCache[player.icon] = null;
+          }
+          const img = iconCache[player.icon];
+          if (img) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, iconSize / 2, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.drawImage(img, x - iconSize / 2, y - iconSize / 2, iconSize, iconSize);
+            ctx.restore();
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, iconSize / 2, 0, Math.PI * 2);
+            ctx.strokeStyle = ds.borderColor;
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            ctx.restore();
+          }
+        } else {
+          // アイコンなしは名前の頭文字
+          const colors = ['#1a6b3c','#185FA5','#854F0B','#5b21b6','#9d174d','#3730a3','#c2410c','#0e7490','#4d7c0f','#7c3aed','#b45309','#0f766e'];
+          const color = colors[di % colors.length];
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(x, y, iconSize / 2, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.fill();
+          ctx.fillStyle = '#fff';
+          ctx.font = `bold ${Math.floor(iconSize * 0.4)}px 'Noto Sans JP', sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(player.name.slice(0, 1), x, y);
+          ctx.restore();
         }
       });
-      td.appendChild(inp); tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  }
-  table.appendChild(tbody);
-}
+    }
+  };
 
-function updateRegProgress() {
-  const total = participants.length * maxH;
-  const filled = Object.values(draftData).flat().filter(x => x).length;
-  document.getElementById('reg-count').textContent = filled;
-  document.getElementById('reg-total').textContent = total;
-  document.getElementById('draft-start-btn').disabled = filled === 0;
-}
-
-document.getElementById('draft-start-btn').addEventListener('click', () => {
-  const empty = participants.some(p => draftData[p].some(h => !h));
-  if (empty && !confirm('未入力の馬名があります。このままドラフトを開始しますか？')) return;
-  revealedHorses = {}; revealedSet = {};
-  participants.forEach(p => { revealedSet[p] = Array(maxH).fill(false); });
-  showDraft();
-});
-
-function backToRegister() { showRegister(); }
-
-// STEP3
-function showDraft() {
-  currentStep = 'draft';
-  document.getElementById('register').style.display = 'none';
-  document.getElementById('setup').style.display = 'none';
-  document.getElementById('draft').style.display = 'block';
-  buildDraftTable(); updateStats(); saveState();
-}
-
-function encodeId(str) { return str.replace(/[^a-zA-Z0-9]/g, c => '_' + c.charCodeAt(0) + '_'); }
-function getDCard(p, i) { return document.getElementById(`dc_${encodeId(p)}_${i}`); }
-
-function buildDraftTable() {
-  const table = document.getElementById('draft-table'); table.innerHTML = '';
-  const thead = document.createElement('thead');
-  const hr = document.createElement('tr');
-  const th0 = document.createElement('th'); th0.textContent = '順位'; hr.appendChild(th0);
-  participants.forEach(p => { const th = document.createElement('th'); th.textContent = p; hr.appendChild(th); });
-  thead.appendChild(hr); table.appendChild(thead);
-  const tbody = document.createElement('tbody');
-  for (let i = 0; i < maxH; i++) {
-    const tr = document.createElement('tr');
-    const td0 = document.createElement('td'); td0.textContent = `${i+1}位`; tr.appendChild(td0);
-    participants.forEach(p => {
-      const td = document.createElement('td');
-      const card = document.createElement('div');
-      card.className = 'card'; card.id = `dc_${encodeId(p)}_${i}`;
-      const horse = draftData[p][i];
-      if (!horse) {
-        card.classList.add('empty'); card.textContent = '－';
-      } else if (revealedSet[p] && revealedSet[p][i]) {
-        const isDup = revealedHorses[horse] !== p;
-        card.classList.add('revealed', isDup ? 'dup' : 'ok');
-        card.innerHTML = `<span class="card-mark">${isDup ? '😇' : '🎯'}</span><span class="card-name">${horse}</span>`;
-      } else {
-        card.textContent = '🂠'; card.addEventListener('click', () => revealCard(p, i));
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: chartDatasets },
+    plugins: [lastPointIconPlugin],
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => `${c.dataset.label}: ${mode === 'rank' ? c.parsed.y + '位' : c.parsed.y + 'pt'}` } }
+      },
+      scales: {
+        y: {
+          reverse: mode === 'rank',
+          ticks: { stepSize: 1, callback: v => mode === 'rank' ? v + '位' : v + 'pt' },
+          grid: { color: '#e5e7eb' }
+        },
+        x: { grid: { color: '#e5e7eb' } }
       }
-      td.appendChild(card); tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  }
-  table.appendChild(tbody);
-}
-
-function revealCard(p, rank) {
-  if (revealedSet[p][rank]) return;
-  const horse = draftData[p][rank]; if (!horse) return;
-  const isDup = revealedHorses[horse] !== undefined;
-  if (!isDup) revealedHorses[horse] = p;
-  revealedSet[p][rank] = true;
-  const card = getDCard(p, rank);
-  card.classList.add('revealed', isDup ? 'dup' : 'ok');
-  card.innerHTML = `<span class="card-mark">${isDup ? '😇' : '🎯'}</span><span class="card-name">${horse}</span>`;
-  updateStats(); saveState();
-}
-
-function updateStats() {
-  const total = Object.values(draftData).flat().filter(x => x).length;
-  const revealed = Object.values(revealedSet).flat().filter(Boolean).length;
-  const wins = Object.keys(revealedHorses).length;
-  const dups = revealed - wins;
-  document.getElementById('stats').innerHTML =
-    `<div class="stat">めくり済み　<b>${revealed} / ${total}</b></div>` +
-    `<div class="stat ok-stat">🎯 当選　<b>${wins}</b></div>` +
-    `<div class="stat dup-stat">😇 重複　<b>${dups}</b></div>`;
-}
-
-function resetAll() {
-  if (!confirm('最初からやり直しますか？保存データもすべて消えます。')) return;
-  clearSaved();
-  participants = []; draftData = {}; revealedHorses = {}; revealedSet = {}; currentStep = 'setup';
-  document.getElementById('draft').style.display = 'none';
-  document.getElementById('register').style.display = 'none';
-  document.getElementById('setup').style.display = 'block';
-  renderTags();
-}
-
-// 画像保存
-function saveImage() {
-  const btn = document.getElementById('save-img-btn');
-  btn.textContent = '生成中...'; btn.disabled = true;
-
-  const table = document.getElementById('draft-table');
-  const wrapper = document.createElement('div');
-  wrapper.style.cssText = 'background:#fbfbf9;padding:28px;display:inline-block;font-family:sans-serif;';
-
-  const title = document.createElement('div');
-  title.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:6px;';
-  title.innerHTML = `<div style="width:28px;height:28px;background:#e60023;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:15px;">P</div><span style="font-size:20px;font-weight:700;color:#000;letter-spacing:-0.5px;">POG Draft 結果</span>`;
-  wrapper.appendChild(title);
-
-  const legend = document.createElement('div');
-  legend.style.cssText = 'font-size:12px;color:#62625b;margin-bottom:14px;font-weight:600;';
-  legend.textContent = '🎯 当選（他に指名なし）　😇 ハズレ（重複）';
-  wrapper.appendChild(legend);
-
-  const clone = table.cloneNode(true);
-  clone.style.cssText = 'border-collapse:collapse;font-size:12px;color:#33332e;background:#ffffff;border-radius:16px;overflow:hidden;';
-  clone.querySelectorAll('th').forEach(th => {
-    th.style.cssText = 'background:#f6f6f3;color:#62625b;padding:10px 8px;border:1px solid #dadad3;text-align:center;white-space:nowrap;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;';
+    }
   });
-  clone.querySelectorAll('td').forEach(td => {
-    td.style.cssText = 'padding:5px 6px;border:1px solid #e5e5e0;text-align:center;vertical-align:middle;background:#ffffff;';
-  });
-  clone.querySelectorAll('td:first-child').forEach(td => {
-    td.style.cssText = 'padding:5px 8px;border:1px solid #dadad3;background:#f6f6f3;color:#62625b;font-size:11px;font-weight:700;text-align:center;';
-  });
-  clone.querySelectorAll('.card').forEach(card => {
-    let bg = '#f6f6f3', color = '#91918c', border = '#dadad3';
-    if (card.classList.contains('ok'))  { bg = '#c7f0da'; color = '#103c25'; border = '#6cc49a'; }
-    if (card.classList.contains('dup')) { bg = '#fce8e8'; color = '#9e0a0a'; border = '#e8a0a0'; }
-    if (card.classList.contains('empty')) { bg = '#f6f6f3'; color = '#c8c8c1'; }
-    card.style.cssText = `background:${bg};color:${color};border:1px solid ${border};border-radius:10px;padding:5px 4px;font-size:11px;font-weight:700;text-align:center;line-height:1.4;min-height:40px;display:flex;align-items:center;justify-content:center;flex-direction:column;`;
-  });
-  wrapper.appendChild(clone);
-  document.body.appendChild(wrapper);
 
-  import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js').then(mod => {
-    mod.default(wrapper, { backgroundColor: '#fbfbf9', scale: 2, useCORS: true, logging: false })
-    .then(canvas => {
-      document.body.removeChild(wrapper);
-      const link = document.createElement('a');
-      link.download = 'pog_draft_result.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      btn.textContent = '📷 画像で保存'; btn.disabled = false;
-    }).catch(() => { document.body.removeChild(wrapper); alert('画像の生成に失敗しました。'); btn.textContent = '📷 画像で保存'; btn.disabled = false; });
-  }).catch(() => { document.body.removeChild(wrapper); alert('ライブラリの読み込みに失敗しました。'); btn.textContent = '📷 画像で保存'; btn.disabled = false; });
+  document.getElementById('chart-legend').innerHTML = state.players.map((p, i) =>
+    `<div style="display:flex;align-items:center;gap:6px;font-size:12px">
+      <span style="width:24px;height:3px;border-radius:2px;background:${COLORS[i % COLORS.length]};display:inline-block"></span>
+      ${playerIcon(p, 18)}
+      <span>${p.name}</span>
+    </div>`
+  ).join('');
 }
+
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  const btn=document.querySelector(`[onclick="showPanel('${name}')"]`);
+  if(btn)btn.classList.add('active');
+  if(name==='points')renderPoints();
+  if(name==='chart')renderChart();
+}
+
+function renderAll(){renderRanking();renderHomeEntries();renderHorses();renderResults();renderEntries();renderPlayerList();updateSelects();}
+
+loadData();
 </script>
 </body>
 </html>
