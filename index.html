@@ -281,6 +281,14 @@
   tbody tr:hover td { background: var(--surface-soft); }
   tbody tr:hover td:first-child { background: var(--surface-card); }
 
+  /* ドラッグ列並び替え */
+  thead th.draggable { cursor: grab; user-select: none; }
+  thead th.draggable:active { cursor: grabbing; }
+  thead th.drag-over { background: #fce8e8 !important; color: var(--primary); border-bottom: 3px solid var(--primary); }
+  thead th.dragging { opacity: 0.35; }
+  .th-inner { display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .drag-grip { font-size: 12px; color: var(--stone); }
+
   /* ── REG INPUT ── */
   .reg-input {
     width: 100%; min-width: 80px; max-width: 130px;
@@ -496,7 +504,45 @@ function buildRegTable() {
   const thead = document.createElement('thead');
   const hr = document.createElement('tr');
   const th0 = document.createElement('th'); th0.textContent = '順位'; hr.appendChild(th0);
-  participants.forEach(p => { const th = document.createElement('th'); th.textContent = p; hr.appendChild(th); });
+
+  participants.forEach((p, colIdx) => {
+    const th = document.createElement('th');
+    th.className = 'draggable';
+    th.draggable = true;
+    th.dataset.col = colIdx;
+    th.innerHTML = `<span class="th-inner"><span class="drag-grip">⠿</span>${p}</span>`;
+
+    th.addEventListener('dragstart', e => {
+      dragSrcCol = colIdx;
+      e.dataTransfer.effectAllowed = 'move';
+      th.classList.add('dragging');
+    });
+    th.addEventListener('dragend', () => {
+      document.querySelectorAll('thead th').forEach(t => t.classList.remove('dragging', 'drag-over'));
+    });
+    th.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('thead th.drag-over').forEach(t => t.classList.remove('drag-over'));
+      th.classList.add('drag-over');
+    });
+    th.addEventListener('dragleave', () => th.classList.remove('drag-over'));
+    th.addEventListener('drop', e => {
+      e.preventDefault();
+      th.classList.remove('drag-over');
+      const destCol = parseInt(th.dataset.col);
+      if (dragSrcCol === destCol) return;
+      // participants配列を並び替え
+      const moved = participants.splice(dragSrcCol, 1)[0];
+      participants.splice(destCol, 0, moved);
+      // draftDataも並び替え（順序はparticipants配列で管理しているので不要）
+      saveState();
+      buildRegTable();
+      updateRegProgress();
+    });
+    hr.appendChild(th);
+  });
+
   thead.appendChild(hr); table.appendChild(thead);
   const tbody = document.createElement('tbody');
   for (let i = 0; i < maxH; i++) {
@@ -526,6 +572,8 @@ function buildRegTable() {
   }
   table.appendChild(tbody);
 }
+
+let dragSrcCol = -1;
 
 function updateRegProgress() {
   const total = participants.length * maxH;
