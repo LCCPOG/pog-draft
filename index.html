@@ -350,6 +350,13 @@
   }
   .card-mark { font-size: 14px; display: block; }
   .card-name { font-size: 11px; display: block; margin-top: 2px; font-weight: 700; }
+  .card-sub { font-size: 9px; display: block; margin-top: 2px; font-weight: 400; opacity: 0.75; line-height: 1.3; }
+
+  /* 登録セルの複数入力 */
+  .reg-cell { display: flex; flex-direction: column; gap: 3px; min-width: 90px; max-width: 140px; margin: auto; }
+  .reg-input-sub { width: 100%; background: var(--surface-soft); border: 1px solid var(--hairline-soft); border-radius: var(--r-sm); color: var(--mute); font-family: inherit; font-size: 11px; padding: 4px 7px; outline: none; text-align: center; transition: border 0.15s; display: block; height: auto; }
+  .reg-input-sub:focus { border: 1px solid var(--stone); background: var(--canvas); color: var(--ink); }
+  .reg-input-sub::placeholder { color: var(--stone); }
 </style>
 </head>
 <body>
@@ -443,7 +450,12 @@ window.addEventListener('load', () => {
 
 function resumeSession() {
   const s = loadState(); if (!s) return;
-  participants = s.participants; maxH = s.maxH; draftData = s.draftData;
+  participants = s.participants; maxH = s.maxH;
+  // 旧形式（文字列）→新形式（オブジェクト）互換変換
+  draftData = {};
+  Object.keys(s.draftData).forEach(p => {
+    draftData[p] = s.draftData[p].map(v => typeof v === 'string' ? {h: v, s: '', o: ''} : v);
+  });
   revealedHorses = s.revealedHorses || {}; revealedSet = s.revealedSet || {}; currentStep = s.currentStep;
   document.getElementById('max-p').value = participants.length;
   document.getElementById('max-h').value = maxH;
@@ -480,7 +492,7 @@ pInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getEle
 setupStartBtn.addEventListener('click', () => {
   maxH = parseInt(document.getElementById('max-h').value) || 15;
   draftData = {};
-  participants.forEach(p => { draftData[p] = Array(maxH).fill(''); });
+  participants.forEach(p => { draftData[p] = Array.from({length: maxH}, () => ({h:'',s:'',o:''})); });
   showRegister();
 });
 
@@ -550,15 +562,35 @@ function buildRegTable() {
     const td0 = document.createElement('td'); td0.textContent = `${i+1}位`; tr.appendChild(td0);
     participants.forEach(p => {
       const td = document.createElement('td');
+      const cell = document.createElement('div');
+      cell.className = 'reg-cell';
+
+      const entry = draftData[p][i] || {h:'',s:'',o:''};
+
+      // 馬名
       const inp = document.createElement('input');
       inp.type = 'text'; inp.className = 'reg-input'; inp.maxLength = 30; inp.placeholder = '馬名';
-      inp.value = draftData[p][i] || '';
+      inp.value = entry.h || '';
       if (inp.value) inp.classList.add('filled');
       inp.addEventListener('input', () => {
-        draftData[p][i] = inp.value.trim();
+        draftData[p][i].h = inp.value.trim();
         inp.classList.toggle('filled', !!inp.value.trim());
         updateRegProgress(); saveState();
       });
+
+      // 厩舎
+      const inpS = document.createElement('input');
+      inpS.type = 'text'; inpS.className = 'reg-input-sub'; inpS.maxLength = 20; inpS.placeholder = '厩舎（任意）';
+      inpS.value = entry.s || '';
+      inpS.addEventListener('input', () => { draftData[p][i].s = inpS.value.trim(); saveState(); });
+
+      // 馬主
+      const inpO = document.createElement('input');
+      inpO.type = 'text'; inpO.className = 'reg-input-sub'; inpO.maxLength = 20; inpO.placeholder = '馬主（任意）';
+      inpO.value = entry.o || '';
+      inpO.addEventListener('input', () => { draftData[p][i].o = inpO.value.trim(); saveState(); });
+
+      // Enterで次セルへ（馬名欄のみ）
       inp.addEventListener('keydown', e => {
         if (e.key === 'Enter') {
           const inputs = Array.from(document.querySelectorAll('.reg-input'));
@@ -566,7 +598,9 @@ function buildRegTable() {
           if (idx + 1 < inputs.length) inputs[idx + 1].focus();
         }
       });
-      td.appendChild(inp); tr.appendChild(td);
+
+      cell.appendChild(inp); cell.appendChild(inpS); cell.appendChild(inpO);
+      td.appendChild(cell); tr.appendChild(td);
     });
     tbody.appendChild(tr);
   }
@@ -577,14 +611,14 @@ let dragSrcCol = -1;
 
 function updateRegProgress() {
   const total = participants.length * maxH;
-  const filled = Object.values(draftData).flat().filter(x => x).length;
+  const filled = Object.values(draftData).flat().filter(x => x && x.h).length;
   document.getElementById('reg-count').textContent = filled;
   document.getElementById('reg-total').textContent = total;
   document.getElementById('draft-start-btn').disabled = filled === 0;
 }
 
 document.getElementById('draft-start-btn').addEventListener('click', () => {
-  const empty = participants.some(p => draftData[p].some(h => !h));
+  const empty = participants.some(p => draftData[p].some(h => !h.h));
   if (empty && !confirm('未入力の馬名があります。このままドラフトを開始しますか？')) return;
   revealedHorses = {}; revealedSet = {};
   participants.forEach(p => { revealedSet[p] = Array(maxH).fill(false); });
@@ -620,13 +654,16 @@ function buildDraftTable() {
       const td = document.createElement('td');
       const card = document.createElement('div');
       card.className = 'card'; card.id = `dc_${encodeId(p)}_${i}`;
-      const horse = draftData[p][i];
+      const entry = draftData[p][i] || {h:'',s:'',o:''};
+      const horse = entry.h;
       if (!horse) {
         card.classList.add('empty'); card.textContent = '－';
       } else if (revealedSet[p] && revealedSet[p][i]) {
         const isDup = revealedHorses[horse] !== p;
         card.classList.add('revealed', isDup ? 'dup' : 'ok');
-        card.innerHTML = `<span class="card-mark">${isDup ? '😇' : '🎯'}</span><span class="card-name">${horse}</span>`;
+        const subParts = [entry.s, entry.o].filter(Boolean);
+        const subHtml = subParts.length ? `<span class="card-sub">${subParts.join(' / ')}</span>` : '';
+        card.innerHTML = `<span class="card-mark">${isDup ? '😇' : '🎯'}</span><span class="card-name">${horse}</span>${subHtml}`;
       } else {
         card.textContent = '🂠'; card.addEventListener('click', () => revealCard(p, i));
       }
@@ -639,18 +676,21 @@ function buildDraftTable() {
 
 function revealCard(p, rank) {
   if (revealedSet[p][rank]) return;
-  const horse = draftData[p][rank]; if (!horse) return;
+  const entry = draftData[p][rank] || {h:'',s:'',o:''};
+  const horse = entry.h; if (!horse) return;
   const isDup = revealedHorses[horse] !== undefined;
   if (!isDup) revealedHorses[horse] = p;
   revealedSet[p][rank] = true;
   const card = getDCard(p, rank);
   card.classList.add('revealed', isDup ? 'dup' : 'ok');
-  card.innerHTML = `<span class="card-mark">${isDup ? '😇' : '🎯'}</span><span class="card-name">${horse}</span>`;
+  const subParts = [entry.s, entry.o].filter(Boolean);
+  const subHtml = subParts.length ? `<span class="card-sub">${subParts.join(' / ')}</span>` : '';
+  card.innerHTML = `<span class="card-mark">${isDup ? '😇' : '🎯'}</span><span class="card-name">${horse}</span>${subHtml}`;
   updateStats(); saveState();
 }
 
 function updateStats() {
-  const total = Object.values(draftData).flat().filter(x => x).length;
+  const total = Object.values(draftData).flat().filter(x => x && x.h).length;
   const revealed = Object.values(revealedSet).flat().filter(Boolean).length;
   const wins = Object.keys(revealedHorses).length;
   const dups = revealed - wins;
@@ -706,6 +746,8 @@ function saveImage() {
     if (card.classList.contains('dup')) { bg = '#fce8e8'; color = '#9e0a0a'; border = '#e8a0a0'; }
     if (card.classList.contains('empty')) { bg = '#f6f6f3'; color = '#c8c8c1'; }
     card.style.cssText = `background:${bg};color:${color};border:1px solid ${border};border-radius:10px;padding:5px 4px;font-size:11px;font-weight:700;text-align:center;line-height:1.4;min-height:40px;display:flex;align-items:center;justify-content:center;flex-direction:column;`;
+    const sub = card.querySelector('.card-sub');
+    if (sub) sub.style.cssText = 'font-size:9px;font-weight:400;opacity:0.75;margin-top:2px;display:block;';
   });
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
