@@ -361,6 +361,7 @@
   .card-sub { font-size: 11px; display: block; font-weight: 400; opacity: 0.85; line-height: 1.5; white-space: nowrap; text-align: center; }
   .card-parents { display: flex; flex-direction: column; align-items: center; margin-top: 3px; gap: 1px; }
   .card-parent { font-size: 11px; display: block; font-weight: 400; color: var(--mute); line-height: 1.5; white-space: nowrap; text-align: center; }
+  .card-info { font-size: 11px; display: block; font-weight: 600; line-height: 1.5; text-align: center; margin-top: 2px; opacity: 0.9; }
   .card-sub-wrap { display: flex; flex-direction: column; align-items: center; margin-top: 4px; gap: 1px; }
 
   /* 登録セルの複数入力 */
@@ -368,6 +369,10 @@
   .reg-input-sub { width: 100%; background: var(--surface-soft); border: 1px solid var(--hairline-soft); border-radius: var(--r-sm); color: var(--mute); font-family: inherit; font-size: 11px; padding: 4px 7px; outline: none; text-align: center; transition: border 0.15s; display: block; height: auto; }
   .reg-input-sub:focus { border: 1px solid var(--stone); background: var(--canvas); color: var(--ink); }
   .reg-input-sub::placeholder { color: var(--stone); }
+  .reg-select-sub { width: 100%; background: var(--surface-soft); border: 1px solid var(--hairline-soft); border-radius: var(--r-sm); color: var(--mute); font-family: inherit; font-size: 11px; padding: 4px 7px; outline: none; transition: border 0.15s; display: block; cursor: pointer; }
+  .reg-select-sub:focus { border: 1px solid var(--stone); background: var(--canvas); color: var(--ink); }
+  .reg-row-sub { display: flex; gap: 3px; }
+  .reg-row-sub .reg-input-sub { flex: 1; }
 </style>
 </head>
 <body>
@@ -465,7 +470,7 @@ function resumeSession() {
   // 旧形式（文字列）→新形式（オブジェクト）互換変換
   draftData = {};
   Object.keys(s.draftData).forEach(p => {
-    draftData[p] = s.draftData[p].map(v => typeof v === 'string' ? {h: v, s: '', o: '', f: '', m: ''} : Object.assign({f:'', m:''}, v));
+    draftData[p] = s.draftData[p].map(v => typeof v === 'string' ? {h: v, s: '', o: '', f: '', m: '', g: '', b: ''} : Object.assign({f:'', m:'', g:'', b:''}, v));
   });
   revealedHorses = s.revealedHorses || {}; revealedSet = s.revealedSet || {}; currentStep = s.currentStep;
   document.getElementById('max-p').value = participants.length;
@@ -503,7 +508,7 @@ pInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getEle
 setupStartBtn.addEventListener('click', () => {
   maxH = parseInt(document.getElementById('max-h').value) || 15;
   draftData = {};
-  participants.forEach(p => { draftData[p] = Array.from({length: maxH}, () => ({h:'',s:'',o:'',f:'',m:''})); });
+  participants.forEach(p => { draftData[p] = Array.from({length: maxH}, () => ({h:'',s:'',o:'',f:'',m:'',g:'',b:''})); });
   showRegister();
 });
 
@@ -589,6 +594,28 @@ function buildRegTable() {
         updateRegProgress(); saveState();
       });
 
+      // 性別（プルダウン）・生年月日（横並び）
+      const rowGender = document.createElement('div');
+      rowGender.className = 'reg-row-sub';
+
+      const selG = document.createElement('select');
+      selG.className = 'reg-select-sub';
+      [['', '性別'], ['牡', '牡馬'], ['牝', '牝馬'], ['せん', 'せん馬']].forEach(([val, label]) => {
+        const opt = document.createElement('option');
+        opt.value = val; opt.textContent = label;
+        if (val === (entry.g || '')) opt.selected = true;
+        selG.appendChild(opt);
+      });
+      selG.addEventListener('change', () => { draftData[p][i].g = selG.value; saveState(); });
+
+      const inpB = document.createElement('input');
+      inpB.type = 'text'; inpB.className = 'reg-input-sub'; inpB.maxLength = 5; inpB.placeholder = '月/日';
+      inpB.value = entry.b || '';
+      inpB.addEventListener('input', () => { draftData[p][i].b = inpB.value.trim(); saveState(); });
+
+      rowGender.appendChild(selG); rowGender.appendChild(inpB);
+      cell.appendChild(rowGender);
+
       // 厩舎
       const inpS = document.createElement('input');
       inpS.type = 'text'; inpS.className = 'reg-input-sub'; inpS.maxLength = 20; inpS.placeholder = '厩舎（任意）';
@@ -673,7 +700,14 @@ function makeCardHTML(mark, entry, winNum) {
   const markHtml = winNum != null
     ? `<span class="card-mark">${mark} ${winNum}頭目</span>`
     : `<span class="card-mark">${mark}</span>`;
-  return `${markHtml}<span class="${nameClass}">${horse}</span>${parentsHtml}${subHtml}`;
+  let infoHtml = '';
+  if (entry.g || entry.b) {
+    const gLabel = entry.g ? (entry.g === '牡' ? '牡馬' : entry.g === '牝' ? '牝馬' : 'せん馬') : '';
+    const bLabel = entry.b ? `${entry.b}生` : '';
+    const infoText = [gLabel, bLabel].filter(Boolean).join('・');
+    infoHtml = `<span class="card-info">${infoText}</span>`;
+  }
+  return `${markHtml}<span class="${nameClass}">${horse}</span>${infoHtml}${parentsHtml}${subHtml}`;
 }
 function getDCard(p, i) { return document.getElementById(`dc_${encodeId(p)}_${i}`); }
 
@@ -812,6 +846,8 @@ function saveImage() {
     });
     const parents = card.querySelector('.card-parents');
     if (parents) parents.style.cssText = 'display:flex;flex-direction:column;align-items:center;margin-top:3px;gap:1px;';
+    const info = card.querySelector('.card-info');
+    if (info) info.style.cssText = 'font-size:11px;font-weight:600;display:block;line-height:1.5;text-align:center;margin-top:2px;opacity:0.9;';
     const subWrap = card.querySelector('.card-sub-wrap');
     if (subWrap) subWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;margin-top:4px;gap:1px;';
     const cardName = card.querySelector('.card-name');
