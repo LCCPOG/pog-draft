@@ -359,6 +359,8 @@
     word-break: break-all;
   }
   .card-sub { font-size: 11px; display: block; font-weight: 400; opacity: 0.85; line-height: 1.5; white-space: nowrap; text-align: center; }
+  .card-parents { display: flex; flex-direction: column; align-items: center; margin-top: 3px; gap: 1px; }
+  .card-parent { font-size: 11px; display: block; font-weight: 400; color: var(--mute); line-height: 1.5; white-space: nowrap; text-align: center; }
   .card-sub-wrap { display: flex; flex-direction: column; align-items: center; margin-top: 4px; gap: 1px; }
 
   /* 登録セルの複数入力 */
@@ -463,7 +465,7 @@ function resumeSession() {
   // 旧形式（文字列）→新形式（オブジェクト）互換変換
   draftData = {};
   Object.keys(s.draftData).forEach(p => {
-    draftData[p] = s.draftData[p].map(v => typeof v === 'string' ? {h: v, s: '', o: ''} : v);
+    draftData[p] = s.draftData[p].map(v => typeof v === 'string' ? {h: v, s: '', o: '', f: '', m: ''} : Object.assign({f:'', m:''}, v));
   });
   revealedHorses = s.revealedHorses || {}; revealedSet = s.revealedSet || {}; currentStep = s.currentStep;
   document.getElementById('max-p').value = participants.length;
@@ -501,7 +503,7 @@ pInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getEle
 setupStartBtn.addEventListener('click', () => {
   maxH = parseInt(document.getElementById('max-h').value) || 15;
   draftData = {};
-  participants.forEach(p => { draftData[p] = Array.from({length: maxH}, () => ({h:'',s:'',o:''})); });
+  participants.forEach(p => { draftData[p] = Array.from({length: maxH}, () => ({h:'',s:'',o:'',f:'',m:''})); });
   showRegister();
 });
 
@@ -601,7 +603,19 @@ function buildRegTable() {
 
 
 
-      cell.appendChild(inp); cell.appendChild(inpS); cell.appendChild(inpO);
+      // 父
+      const inpF = document.createElement('input');
+      inpF.type = 'text'; inpF.className = 'reg-input-sub'; inpF.maxLength = 20; inpF.placeholder = '父（任意）';
+      inpF.value = entry.f || '';
+      inpF.addEventListener('input', () => { draftData[p][i].f = inpF.value.trim(); saveState(); });
+
+      // 母
+      const inpM = document.createElement('input');
+      inpM.type = 'text'; inpM.className = 'reg-input-sub'; inpM.maxLength = 20; inpM.placeholder = '母（任意）';
+      inpM.value = entry.m || '';
+      inpM.addEventListener('input', () => { draftData[p][i].m = inpM.value.trim(); saveState(); });
+
+      cell.appendChild(inp); cell.appendChild(inpS); cell.appendChild(inpO); cell.appendChild(inpF); cell.appendChild(inpM);
       td.appendChild(cell); tr.appendChild(td);
     });
     tbody.appendChild(tr);
@@ -644,6 +658,12 @@ function makeCardHTML(mark, entry, winNum) {
   const horse = entry.h || '';
   const isLong = horse.length > 9;
   const nameClass = isLong ? 'card-name long' : 'card-name';
+  let parentsHtml = '';
+  if (entry.f || entry.m) {
+    const fHtml = entry.f ? `<span class="card-parent">父：${entry.f}</span>` : '';
+    const mHtml = entry.m ? `<span class="card-parent">母：${entry.m}</span>` : '';
+    parentsHtml = `<div class="card-parents">${fHtml}${mHtml}</div>`;
+  }
   let subHtml = '';
   if (entry.s || entry.o) {
     const sHtml = entry.s ? `<span class="card-sub">🏠 ${entry.s}</span>` : '';
@@ -653,7 +673,7 @@ function makeCardHTML(mark, entry, winNum) {
   const markHtml = winNum != null
     ? `<span class="card-mark">${mark} ${winNum}頭目</span>`
     : `<span class="card-mark">${mark}</span>`;
-  return `${markHtml}<span class="${nameClass}">${horse}</span>${subHtml}`;
+  return `${markHtml}<span class="${nameClass}">${horse}</span>${parentsHtml}${subHtml}`;
 }
 function getDCard(p, i) { return document.getElementById(`dc_${encodeId(p)}_${i}`); }
 
@@ -787,6 +807,11 @@ function saveImage() {
     card.querySelectorAll('.card-sub').forEach(sub => {
       sub.style.cssText = 'font-size:11px;font-weight:400;opacity:0.85;display:block;white-space:nowrap;line-height:1.5;text-align:center;';
     });
+    card.querySelectorAll('.card-parent').forEach(p => {
+      p.style.cssText = 'font-size:11px;font-weight:400;display:block;white-space:nowrap;line-height:1.5;text-align:center;opacity:0.75;';
+    });
+    const parents = card.querySelector('.card-parents');
+    if (parents) parents.style.cssText = 'display:flex;flex-direction:column;align-items:center;margin-top:3px;gap:1px;';
     const subWrap = card.querySelector('.card-sub-wrap');
     if (subWrap) subWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;margin-top:4px;gap:1px;';
     const cardName = card.querySelector('.card-name');
