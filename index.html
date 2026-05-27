@@ -640,7 +640,7 @@ function showDraft() {
 
 function encodeId(str) { return str.replace(/[^a-zA-Z0-9]/g, c => '_' + c.charCodeAt(0) + '_'); }
 
-function makeCardHTML(mark, entry) {
+function makeCardHTML(mark, entry, winNum) {
   const horse = entry.h || '';
   const isLong = horse.length > 9;
   const nameClass = isLong ? 'card-name long' : 'card-name';
@@ -650,7 +650,10 @@ function makeCardHTML(mark, entry) {
     const oHtml = entry.o ? `<span class="card-sub">👤 ${entry.o}</span>` : '';
     subHtml = `<div class="card-sub-wrap">${sHtml}${oHtml}</div>`;
   }
-  return `<span class="card-mark">${mark}</span><span class="${nameClass}">${horse}</span>${subHtml}`;
+  const markHtml = winNum != null
+    ? `<span class="card-mark">${mark} ${winNum}頭目</span>`
+    : `<span class="card-mark">${mark}</span>`;
+  return `${markHtml}<span class="${nameClass}">${horse}</span>${subHtml}`;
 }
 function getDCard(p, i) { return document.getElementById(`dc_${encodeId(p)}_${i}`); }
 
@@ -659,7 +662,12 @@ function buildDraftTable() {
   const thead = document.createElement('thead');
   const hr = document.createElement('tr');
   const th0 = document.createElement('th'); th0.textContent = '順位'; hr.appendChild(th0);
-  participants.forEach(p => { const th = document.createElement('th'); th.textContent = p; hr.appendChild(th); });
+  participants.forEach(p => {
+    const th = document.createElement('th');
+    th.id = `dth_${encodeId(p)}`;
+    th.innerHTML = `<div style="font-weight:700;">${p}</div><div id="dth_count_${encodeId(p)}" style="font-size:11px;color:var(--primary);font-weight:700;margin-top:2px;">🎯 0頭</div>`;
+    hr.appendChild(th);
+  });
   thead.appendChild(hr); table.appendChild(thead);
   const tbody = document.createElement('tbody');
   for (let i = 0; i < maxH; i++) {
@@ -676,7 +684,11 @@ function buildDraftTable() {
       } else if (revealedSet[p] && revealedSet[p][i]) {
         const isDup = revealedHorses[horse] !== p;
         card.classList.add('revealed', isDup ? 'dup' : 'ok');
-        card.innerHTML = makeCardHTML(isDup ? '😇' : '🎯', entry);
+        let winNum = null;
+  if (!isDup) {
+    winNum = draftData[p].filter((e, i) => i <= rank && e && e.h && revealedHorses[e.h] === p).length;
+  }
+  card.innerHTML = makeCardHTML(isDup ? '😇' : '🎯', entry, isDup ? null : winNum);
       } else {
         card.textContent = '🂠'; card.addEventListener('click', () => revealCard(p, i));
       }
@@ -696,7 +708,11 @@ function revealCard(p, rank) {
   revealedSet[p][rank] = true;
   const card = getDCard(p, rank);
   card.classList.add('revealed', isDup ? 'dup' : 'ok');
-  card.innerHTML = makeCardHTML(isDup ? '😇' : '🎯', entry);
+  let winNum = null;
+  if (!isDup) {
+    winNum = draftData[p].filter((e, i) => i <= rank && e && e.h && revealedHorses[e.h] === p).length;
+  }
+  card.innerHTML = makeCardHTML(isDup ? '😇' : '🎯', entry, isDup ? null : winNum);
   updateStats(); saveState();
 }
 
@@ -709,6 +725,17 @@ function updateStats() {
     `<div class="stat">めくり済み　<b>${revealed} / ${total}</b></div>` +
     `<div class="stat ok-stat">🎯 当選　<b>${wins}</b></div>` +
     `<div class="stat dup-stat">😇 重複　<b>${dups}</b></div>`;
+
+  // 参加者ごとの当選カウントをヘッダーに反映
+  participants.forEach(p => {
+    const el = document.getElementById(`dth_count_${encodeId(p)}`);
+    if (!el) return;
+    const count = draftData[p].filter((entry, i) =>
+      revealedSet[p][i] && entry && entry.h && revealedHorses[entry.h] === p
+    ).length;
+    el.textContent = `🎯 ${count}頭`;
+    el.style.color = count > 0 ? 'var(--primary)' : 'var(--ash)';
+  });
 }
 
 function resetAll() {
