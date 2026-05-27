@@ -594,10 +594,7 @@ function buildRegTable() {
         updateRegProgress(); saveState();
       });
 
-      // 性別（プルダウン）・生年月日（横並び）
-      const rowGender = document.createElement('div');
-      rowGender.className = 'reg-row-sub';
-
+      // 性別（プルダウン）
       const selG = document.createElement('select');
       selG.className = 'reg-select-sub';
       [['', '性別'], ['牡', '牡馬'], ['牝', '牝馬'], ['せん', 'せん馬']].forEach(([val, label]) => {
@@ -608,13 +605,13 @@ function buildRegTable() {
       });
       selG.addEventListener('change', () => { draftData[p][i].g = selG.value; saveState(); });
 
+      // 生年月日
       const inpB = document.createElement('input');
-      inpB.type = 'text'; inpB.className = 'reg-input-sub'; inpB.maxLength = 5; inpB.placeholder = '月/日';
+      inpB.type = 'text'; inpB.className = 'reg-input-sub'; inpB.maxLength = 5; inpB.placeholder = '月/日（例：5/14）';
       inpB.value = entry.b || '';
       inpB.addEventListener('input', () => { draftData[p][i].b = inpB.value.trim(); saveState(); });
 
-      rowGender.appendChild(selG); rowGender.appendChild(inpB);
-      cell.appendChild(rowGender);
+
 
       // 厩舎
       const inpS = document.createElement('input');
@@ -642,7 +639,7 @@ function buildRegTable() {
       inpM.value = entry.m || '';
       inpM.addEventListener('input', () => { draftData[p][i].m = inpM.value.trim(); saveState(); });
 
-      cell.appendChild(inp); cell.appendChild(inpS); cell.appendChild(inpO); cell.appendChild(inpF); cell.appendChild(inpM);
+      cell.appendChild(inp); cell.appendChild(selG); cell.appendChild(inpB); cell.appendChild(inpS); cell.appendChild(inpO); cell.appendChild(inpF); cell.appendChild(inpM);
       td.appendChild(cell); tr.appendChild(td);
     });
     tbody.appendChild(tr);
