@@ -315,7 +315,7 @@
 
   /* ── DRAFT CARD ── */
   .card {
-    min-width: 115px; max-width: 150px; width: 100%;
+    min-width: 130px; max-width: 170px; width: 100%;
     min-height: 52px;
     border-radius: var(--r-md);
     border: 1px solid var(--hairline);
@@ -350,7 +350,7 @@
   }
   .card-mark { font-size: 14px; display: block; }
   .card-name {
-    font-size: 11px; display: block; margin-top: 2px; font-weight: 700;
+    font-size: 16px; display: block; margin-top: 3px; font-weight: 700;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     max-width: 100%;
   }
@@ -358,8 +358,8 @@
     white-space: normal; overflow: visible; text-overflow: unset;
     word-break: break-all;
   }
-  .card-sub { font-size: 9px; display: inline; font-weight: 400; opacity: 0.8; line-height: 1.4; white-space: nowrap; }
-  .card-sub-wrap { display: block; text-align: center; margin-top: 3px; font-size: 9px; opacity: 0.8; white-space: nowrap; }
+  .card-sub { font-size: 11px; display: block; font-weight: 400; opacity: 0.85; line-height: 1.5; white-space: nowrap; text-align: center; }
+  .card-sub-wrap { display: flex; flex-direction: column; align-items: center; margin-top: 4px; gap: 1px; }
 
   /* 登録セルの複数入力 */
   .reg-cell { display: flex; flex-direction: column; gap: 3px; min-width: 90px; max-width: 140px; margin: auto; }
@@ -646,10 +646,9 @@ function makeCardHTML(mark, entry) {
   const nameClass = isLong ? 'card-name long' : 'card-name';
   let subHtml = '';
   if (entry.s || entry.o) {
-    const parts = [];
-    if (entry.s) parts.push(`🏠 ${entry.s}`);
-    if (entry.o) parts.push(`👤 ${entry.o}`);
-    subHtml = `<div class="card-sub-wrap">${parts.join('　')}</div>`;
+    const sHtml = entry.s ? `<span class="card-sub">🏠 ${entry.s}</span>` : '';
+    const oHtml = entry.o ? `<span class="card-sub">👤 ${entry.o}</span>` : '';
+    subHtml = `<div class="card-sub-wrap">${sHtml}${oHtml}</div>`;
   }
   return `<span class="card-mark">${mark}</span><span class="${nameClass}">${horse}</span>${subHtml}`;
 }
@@ -759,16 +758,16 @@ function saveImage() {
     if (card.classList.contains('empty')) { bg = '#f6f6f3'; color = '#c8c8c1'; }
     card.style.cssText = `background:${bg};color:${color};border:1px solid ${border};border-radius:10px;padding:5px 4px;font-size:11px;font-weight:700;text-align:center;line-height:1.4;min-height:40px;display:flex;align-items:center;justify-content:center;flex-direction:column;`;
     card.querySelectorAll('.card-sub').forEach(sub => {
-      sub.style.cssText = 'font-size:9px;font-weight:400;opacity:0.8;display:block;white-space:nowrap;line-height:1.5;';
+      sub.style.cssText = 'font-size:11px;font-weight:400;opacity:0.85;display:block;white-space:nowrap;line-height:1.5;text-align:center;';
     });
     const subWrap = card.querySelector('.card-sub-wrap');
-    if (subWrap) subWrap.style.cssText = 'display:block;text-align:center;margin-top:3px;font-size:9px;opacity:0.8;white-space:nowrap;';
+    if (subWrap) subWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;margin-top:4px;gap:1px;';
     const cardName = card.querySelector('.card-name');
     if (cardName) {
       if (cardName.classList.contains('long')) {
-        cardName.style.cssText = 'font-size:11px;font-weight:700;display:block;margin-top:2px;word-break:break-all;white-space:normal;';
+        cardName.style.cssText = 'font-size:16px;font-weight:700;display:block;margin-top:3px;word-break:break-all;white-space:normal;';
       } else {
-        cardName.style.cssText = 'font-size:11px;font-weight:700;display:block;margin-top:2px;white-space:nowrap;';
+        cardName.style.cssText = 'font-size:16px;font-weight:700;display:block;margin-top:3px;white-space:nowrap;';
       }
     }
   });
